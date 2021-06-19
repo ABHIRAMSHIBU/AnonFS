@@ -11,7 +11,7 @@ public class Core {
 		Tree t;
 		System.out.println("Hello, welcome to test relhm of Tree!");
 		System.out.println("No root node! need to create one");
-		System.out.println("Enter a value for root node:");
+		System.out.print("Enter a value for root node:");
 		int data = Integer.parseInt(br.readLine().strip());
 		t = new Tree(data);
 		System.out.println("Root Node created with value "+data);
@@ -29,6 +29,7 @@ public class Core {
 				System.out.println("8) Move right");
 				System.out.println("9) Move parent");
 				System.out.println("10) Exit");
+                                System.out.print("Choice:");
 				int choice = Integer.parseInt(br.readLine().strip());
 				switch (choice) {
 				case 1: 

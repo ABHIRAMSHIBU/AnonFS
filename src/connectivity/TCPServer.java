@@ -36,7 +36,6 @@ class TCPServerClientHandler extends Thread {
 					System.out.println("Thread starting with id "+id);
 				    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 				    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-				    out.println("SSAL Command line Ready!");
 				    while(true) {
 				    	String message = in.readLine();
 				    	if(message==null) {
@@ -47,7 +46,6 @@ class TCPServerClientHandler extends Thread {
 				    }
 			}
 			catch (Exception e) {
-				System.out.println("Client telnet handler crash... Restarting..");
 				run();
 			}
 		}

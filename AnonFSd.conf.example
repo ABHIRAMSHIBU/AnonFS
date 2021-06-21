@@ -1,0 +1,95 @@
+# AnonFS v0.1 Configuration 
+
+[network]
+# MAX_UPLOAD_SIZE when equal to 0 will be unlimited which is the default 
+# when it is undeclared. When you set max upload size, your data will be broken 
+# down into pieces smaller than this. It will also prevent downloading pieces which 
+# are bigger than this if asked by another peer, that means it wont be able to relay 
+# piece of higher size. Setting it to less than 4MB is not worth it. 
+# To set maximum upload size, uncomment the line below 
+
+# MAX_UPLOAD_SIZE=32M 
+
+# DAILY_QUOTA_DOWNLOAD when equal to 0 will be unlimited which is the default 
+# when it is undeclared. When you set daily quota download, it will reduce internet 
+# use or even suspend from operation such that daily download does not exceed  
+# your limit. After this quota is exceeded your node will not be functional. 
+# To set daily download limit, uncomment the line below 
+
+# DAILY_QUOTA_DOWNLOAD = 1G 
+
+# DAILY_QUOTA_UPLOAD when equal to 0 will be unlimited which is the default 
+# when it is undeclared. When you set daily quota upload, it will reduce internet 
+# use or even suspend from operation such that daily upload does not exceed  
+# your limit. After this quota is exceeded your node will not be functional. 
+# To set daily download limit, uncomment the line below 
+
+# DAILY_QUOTA_UPLOAD=1G  
+
+# RELAY_ENABLE when set to false will forbid your client from downloading 
+# or uploading pieces which you do not have keys to.  It will not technically forbid 
+# rather your client will choose not to save or relay requests. It will also tell other 
+# peers not to ask for data. 
+
+# RELAY_ENABLE=false 
+
+# MAX_CONNECTIONS basically dictates how much concurrent connections  
+# you can afford. Increasing this value will create stress on your router and  
+# network. If you have any limits on number of ports being opened, this 
+# might use up the ports. By default it is unlimited but restricted to nodes 
+# with lowest pings. This will be a hard limit when set and will always try to  
+# keep that many number of connections set even if pings are worse. 
+# To override you can uncomment the line below. 
+
+# MAX_CONNECTIONS=10 
+
+# DIRECTORY_LIST when set to true will show your willingness to participate 
+# as this service currently has less nodes available, this is default enabled. 
+# But if you ever wish to disable it, you can set it to false. When directory listing 
+# you might get additional network usage. 
+
+# DIRECTORY_LIST = false 
+ 
+# ADVERTISE_ENABLE will make you willing to accept more traffic, when this is 
+# enabled you will become one of the main directory listing server. This option 
+# is completely ignored if DIRECTORY_LIST is set to false. By default it is enabled 
+# due to low peer count. 
+
+# ADVERTISE_ENABLE=false 
+
+# TOR is used to secure the communication even further, enabling it might slow down 
+# the whole network but might give extra layer of security. If you enable tor, it will use 
+# tor socks proxy with port 9050 this means you need to have tor already running. 
+# To enable tor uncomment the below line 
+
+# TOR_ENABLE=true 
+
+# FLOOD_ENABLE basically makes you known by many peers as possible to increase  
+# chance of close proximity to the data. Enabling this might increase network traffic  
+# hence it is discouraged to enable it. 
+# To enable flood uncomment the line below. 
+
+# FLOOD_ENABLE=true 
+
+# MAX_PIECE_SIZE is basically used to set the size of pieces. Bigger the size is file 
+# cannot be scattered easily leading to centralization but if you put piece size too  
+# low, it might take longer time to find and assemble file because it may be scattered. 
+# To set piece size uncomment below line, by default its 4MiB 
+
+# MAX_PIECE_SIZE= 8M 
+
+[disk]
+# Whenever you download or relay something, it will be stored also In your 
+# local disk. All data floating around is encrypted so you won't have access to 
+# real data in it. By default, the limit is 10GiB but if you need to increase it or 
+# decrease it, you can uncomment below line     
+
+# MAX_DISK_SIZE=32G 
+
+# Peer root is where the data is stored. This should be a disk with good speeds 
+# but preferably not a SSD as SSD do have write cycles. This directory may be  
+# written or read from during the operation of your node. 
+# To change the directory where pieces is written, edit the line below 
+ 
+PEER_ROOT=/var/lib/AnonFS/PIECES/ 
+

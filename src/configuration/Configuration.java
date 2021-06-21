@@ -1,4 +1,4 @@
-package connectivity;
+package configuration;
 
 public class Configuration {
 	public static int FETCH_RETRY_COUNT=10;

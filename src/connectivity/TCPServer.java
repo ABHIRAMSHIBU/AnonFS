@@ -4,6 +4,11 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+
+import configuration.Configuration;
+import core.Core;
+import logging.LogManager;
+
 import java.net.ServerSocket;
 
 public class TCPServer {
@@ -14,13 +19,13 @@ public class TCPServer {
 			    serverSocket = new ServerSocket(portNumber);
 			    while(true) {
 			    	Socket clientSocket = serverSocket.accept();
-			    	System.out.println("Accepted connection "+count);
+			    	Core.logManager.log(this.getClass().getName(), "Accepted Connection "+count);
 			    	(new TCPServerClientHandler(clientSocket,count)).start();
 			    	count++;
 			    }
 			}
 		catch (Exception e) {
-			System.out.println("Starting server error!");
+			Core.logManager.critical(this.getClass().getName(), "Unable to start server port:"+portNumber+" might be in use!");
 		}
 	}
 }
@@ -33,14 +38,29 @@ class TCPServerClientHandler extends Thread {
 		}
 		public void run() {
 			try { 
-					System.out.println("Thread starting with id "+id);
 				    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 				    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+				    out.println("AnonFS "+Configuration.version);
 				    while(true) {
 				    	String message = in.readLine();
 				    	if(message==null) {
-				    		System.out.println("Client "+id+" disconnect!");
+				    		Core.logManager.log(this.getClass().getName(), "Client "+id+" disconnected!");
 				    		return;
+				    	}
+				    	if(message.compareTo("info")==0) {
+				    		Core.logManager.log(this.getClass().getName(), "ClientID:"+id+" asked info");
+				    		out.println("AnonFS "+Configuration.version);
+				    	}
+				    	else if(message.compareTo("GetPeerList")==0) {
+				    		out.println("Not Implemented!");
+				    		//TODO Implement GetPeerList
+				    	}
+				    	else if(message.startsWith("PushPiece")) {
+				    		out.println("Not Implemented!");
+				    		// TODO Implement PushPiece
+				    	}
+				    	else {
+				    		out.println("Invalid command!");
 				    	}
 				    	// TODO write what to do here
 				    }

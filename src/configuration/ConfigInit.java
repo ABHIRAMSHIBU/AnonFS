@@ -116,6 +116,6 @@ public class ConfigInit {
 			Core.logManager.log(this.getClass().getName(), "Configuration file exists, reading.");
 		}
 		Ini ini = new Ini(configFile);
-		System.out.println(ini.toString());
+		Core.logManager.log(this.getClass().getName(),"Configuration Parsed-> "+ini.toString());
 	}
 }

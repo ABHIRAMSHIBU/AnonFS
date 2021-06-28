@@ -48,7 +48,7 @@
 # But if you ever wish to disable it, you can set it to false. When directory listing 
 # you might get additional network usage. 
 
-# DIRECTORY_LIST = false 
+# DIRECTORY_LIST=false 
  
 # ADVERTISE_ENABLE will make you willing to accept more traffic, when this is 
 # enabled you will become one of the main directory listing server. This option 
@@ -76,7 +76,12 @@
 # low, it might take longer time to find and assemble file because it may be scattered. 
 # To set piece size uncomment below line, by default its 4MiB 
 
-# MAX_PIECE_SIZE= 8M 
+# MAX_PIECE_SIZE=8M 
+
+# BOOTSTRAP_PEER is the peer with which AnonFS bootstraps. This peer will be used to
+# know other peers. You can set it to a custom peer of your choice.
+
+BOOTSTRAP_PEER=192.168.43.143
 
 [disk]
 # Whenever you download or relay something, it will be stored also In your 

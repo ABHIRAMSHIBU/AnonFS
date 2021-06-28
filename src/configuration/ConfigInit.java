@@ -66,7 +66,7 @@ public class ConfigInit {
 					+ "# But if you ever wish to disable it, you can set it to false. When directory listing \n"
 					+ "# you might get additional network usage. \n"
 					+ "\n"
-					+ "# DIRECTORY_LIST = false \n"
+					+ "# DIRECTORY_LIST=false \n"
 					+ " \n"
 					+ "# ADVERTISE_ENABLE will make you willing to accept more traffic, when this is \n"
 					+ "# enabled you will become one of the main directory listing server. This option \n"
@@ -94,7 +94,12 @@ public class ConfigInit {
 					+ "# low, it might take longer time to find and assemble file because it may be scattered. \n"
 					+ "# To set piece size uncomment below line, by default its 4MiB \n"
 					+ "\n"
-					+ "# MAX_PIECE_SIZE= 8M \n"
+					+ "# MAX_PIECE_SIZE=8M \n"
+					+ "\n"
+					+ "# BOOTSTRAP_PEER is the peer with which AnonFS bootstraps. This peer will be used to\n"
+					+ "# know other peers. You can set it to a custom peer of your choice.\n"
+					+ "\n"
+					+ "BOOTSTRAP_PEER=192.168.43.143\n"
 					+ "\n"
 					+ "[disk]\n"
 					+ "# Whenever you download or relay something, it will be stored also In your \n"
@@ -109,7 +114,9 @@ public class ConfigInit {
 					+ "# written or read from during the operation of your node. \n"
 					+ "# To change the directory where pieces is written, edit the line below \n"
 					+ " \n"
-					+ "PEER_ROOT=/var/lib/AnonFS/PIECES/ \n");
+					+ "PEER_ROOT=/var/lib/AnonFS/PIECES/ \n"
+					+ "\n"
+					+ "");
 			pw.close();
 		}
 		else {

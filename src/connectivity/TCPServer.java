@@ -59,6 +59,17 @@ class TCPServerClientHandler extends Thread {
 				    		out.println("Not Implemented!");
 				    		// TODO Implement PushPiece
 				    	}
+				    	else if(message.startsWith("GetPiece")) {
+				    		out.println("Not Implemented!");
+				    		// TODO Implement GetPiece
+				    	}
+				    	else if(message.startsWith("FindPiece")) {
+				    		out.println("Not Implemented!");
+				    		// TODO Implement FindPiece
+				    	}
+				    	else if(message.startsWith("MyIP")) {
+				    		out.println(clientSocket.getInetAddress().getHostAddress());
+				    	}
 				    	else {
 				    		out.println("Invalid command!");
 				    	}

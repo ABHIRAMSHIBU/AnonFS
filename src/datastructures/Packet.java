@@ -4,6 +4,13 @@ import core.Core;
 
 public class Packet {
 	byte id=0;
+	/** createPakcket when given a byte array will generate a packet.
+	 * 
+	 * @param data - content of packet
+	 * @param request - is it a request (0) or a reply(1)
+	 * @param TTL - time to leave from network.
+	 * @return packet
+	 */
 	public byte[] createPacket(byte[] data,byte request,int TTL) {
 		byte base64Payload = 0;
 		byte breakConnection = 0;
@@ -40,25 +47,30 @@ public class Packet {
 		}
 		return message;
 	}
+	/**decodePacket, decodes packet which is encoded by createPacket.
+	 * 
+	 * @param message - packet
+	 * @return data -data in the packet
+	 */
 	public byte[] decodePacket(byte [] message) {
 		byte flags;
 		int size=0;
 		int ttl=0;
 		int padding = 0;
 		//Core.logManager.log(this.getClass().getName(), "The original length is : "+(20+data.length) );
-		// Set size
+		// Get size
 		for(int i=0;i<8;i++) {
 			size = size | (Byte.toUnsignedInt(message[i])<<(i*8));
 			Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(message[i]));
 		}
 		Core.logManager.log(this.getClass().getName(), "Size is "+size);
 		byte[] data = new byte[size-20];
-		// Set flags
+		// Get flags
 		flags=message[8];
-		// Set id
+		// Get id
 		int id=message[9];
 		Core.logManager.log(this.getClass().getName(), "ID is "+id);
-		// Set padding to 0, currently unused
+		// Get padding 
 		for(int i=0;i<8;i++) {
 			message[i+10]=0;
 		}
@@ -67,13 +79,13 @@ public class Packet {
 			Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(message[i+10]));
 		}
 		Core.logManager.log(this.getClass().getName(), "Padding is "+padding);
-		// Set TTL
+		// Get TTL
 		for(int i=0;i<2;i++) {
 			ttl = ttl | (Byte.toUnsignedInt(message[i+18])<<(i*8));
 			Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(message[i+18]));
 		}
 		Core.logManager.log(this.getClass().getName(), "ttl is "+ttl);
-		// Set data
+		// Get data
 		for(int i=0;i<data.length;i++) {
 			data[i]=message[i+20];
 		}

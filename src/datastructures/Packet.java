@@ -4,6 +4,13 @@ import core.Core;
 
 public class Packet {
 	byte id=0;
+	//_variable are private variables which needs to be shared as they relate to last processed packet.
+	byte _flags;
+	byte _id;
+	byte[] _data;
+	int _size;
+	int _padding;
+	int _ttl;
 	/** createPakcket when given a byte array will generate a packet.
 	 * 
 	 * @param data - content of packet
@@ -63,32 +70,78 @@ public class Packet {
 			size = size | (Byte.toUnsignedInt(message[i])<<(i*8));
 			Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(message[i]));
 		}
+		this._size=size;
 		Core.logManager.log(this.getClass().getName(), "Size is "+size);
 		byte[] data = new byte[size-20];
+		this._data=data;
 		// Get flags
 		flags=message[8];
+		this._flags=flags;
 		// Get id
-		int id=message[9];
+		byte id=message[9];
 		Core.logManager.log(this.getClass().getName(), "ID is "+id);
+		this._id=id;
 		// Get padding 
-		for(int i=0;i<8;i++) {
-			message[i+10]=0;
-		}
 		for(int i=0;i<8;i++) {
 			padding = padding | (Byte.toUnsignedInt(message[i+10])<<(i*8));
 			Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(message[i+10]));
 		}
 		Core.logManager.log(this.getClass().getName(), "Padding is "+padding);
+		this._padding=padding;
 		// Get TTL
 		for(int i=0;i<2;i++) {
 			ttl = ttl | (Byte.toUnsignedInt(message[i+18])<<(i*8));
 			Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(message[i+18]));
 		}
 		Core.logManager.log(this.getClass().getName(), "ttl is "+ttl);
+		this._ttl=ttl;
 		// Get data
 		for(int i=0;i<data.length;i++) {
 			data[i]=message[i+20];
 		}
+		this._data=data;
 		return data;
+	}
+	/**
+	 * Get Time To Leave from network
+	 * @return TTL last packet integer
+	 */
+	public int getTTL() {
+		return this._ttl;
+	}
+	/**
+	 * Get Packet Data
+	 * @return Data in last packet byte array
+	 */
+	public byte[] getData() {
+		return this._data;
+	}
+	/**
+	 * Get Flags
+	 * @return Flags of last packet byte array
+	 */
+	public byte getFlags() {
+		return this._flags;
+	}
+	/**
+	 * Get Packet ID
+	 * @return ID of last packet in byte
+	 */
+	public byte getID() {
+		return this._id;
+	}
+	/**
+	 * Get Size of Packet
+	 * @return Size of the packet in integer
+	 */
+	public int getSize() {
+		return this._size;
+	}
+	/**
+	 * Get Size of Padding
+	 * @return Size of padding in last packet in integer
+	 */
+	public int getPadding() {
+		return this._padding;
 	}
 }

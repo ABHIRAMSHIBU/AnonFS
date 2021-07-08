@@ -187,4 +187,18 @@ public class Packet {
 	public byte getRequestFlag() {
 		return (byte) (_flags & 0x01);
 	}
+	/**
+	 * Fetches Base64Payload flag from the flags of last packet.
+	 * @return - a byte Base64PayloadFlag flag
+	 */
+	public byte getBase64PayloadFlag() {
+		return (byte) ((_flags & 0x02)>>1);
+	}
+	/**
+	 * Fetches BreakConnection flag from the flags of last packet.
+	 * @return - a byte BreakConnection flag
+	 */
+	public byte getBreakConnectionFlag() {
+		return (byte) ((_flags & 0x04)>>2);
+	}
 }

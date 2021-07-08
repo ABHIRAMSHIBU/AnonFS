@@ -2,10 +2,14 @@ package connectivity;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+import algorithm.ByteArrayTransforms;
 import configuration.Configuration;
+import core.Core;
+import datastructures.Packet;
 
 
 
@@ -100,6 +104,28 @@ public class TCPClient{
 		}
 		run=true;
 		return z;
+	}
+	public void sendRequest(String data) throws IOException {
+		Packet p = new Packet();
+		byte data_array[] = new byte[data.length()];
+		for(int i = 0; i<data.length() ; i++) {
+			data_array[i] = (byte)data.charAt(i);
+		}
+		byte packet[]=p.createPacket(data_array, Packet.REQUEST, 1);
+		char packet_char[] = new char[packet.length];
+		for(int i = 0; i<packet.length;i++) {
+			packet_char[i]=(char)packet[i];
+		}
+		OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream());
+		InputStreamReader in = new InputStreamReader(socket.getInputStream());
+		out.write(packet_char);
+		out.flush();
+		System.out.println("Reading Packet");
+		Core.logManager.log(this.getClass().getName(), "Reading packet");
+		p.readInputStreamPacket(in);
+		System.out.println("Reading complete");
+		Core.logManager.log(this.getClass().getName(), "Reading complete");
+		System.out.println("Got data "+new String(ByteArrayTransforms.toCharArray(p.getData())));
 	}
 	public TCPClient() {
 	

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import algorithm.ByteArrayTransforms;
 import configuration.Configuration;
@@ -15,11 +17,19 @@ public class TCPHander extends Thread {
 	int id;
 	boolean server;
 	Packet p ;
-	TCPHander(Socket clientSocket,int id, boolean server) {
+	TCPHander(Socket clientSocket,int id, boolean server) throws IOException {
 		this.clientSocket=clientSocket;
 		this.id = id;
 		this.server = server;
 		p = new Packet();
+		Queue<Object> q = new LinkedList<Object>();
+		if(! Core.pdh.entryExists(clientSocket.getInetAddress().getHostAddress())) {
+			Core.pdh.addPeer(clientSocket.getInetAddress().getAddress().toString(), server, new OutputStreamWriter(clientSocket.getOutputStream()), q);
+			Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" added to Peer DB");
+		}
+		else {
+			Core.logManager.critical(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" already exists in Peer DB! (May be redundant connection)");
+		}
 	}
 	/**Read line takes 1 argument
 	 * InputStreamReader isr
@@ -141,6 +151,10 @@ public class TCPHander extends Thread {
 			    			out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray("Invalid command!"+"\n"), Packet.REPLY, 1)));
 				    		out.flush();
 				    	}
+			    	}
+			    	else {
+			    		// Queue Packet in reply queue.
+			    		Core.pdh.getReplyQueue(clientSocket.getInetAddress().getAddress().toString()).add(packet);
 			    	}
 			    	// TODO write what to do here
 			    }

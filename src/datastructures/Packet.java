@@ -180,6 +180,10 @@ public class Packet {
 		decodePacket((byte [])packet_byte);
 		return packet_byte;
 	}
+	/**
+	 * Fetches request flag from the flags of last packet.
+	 * @return - a byte request flag
+	 */
 	public byte getRequestFlag() {
 		return (byte) (_flags & 0x01);
 	}

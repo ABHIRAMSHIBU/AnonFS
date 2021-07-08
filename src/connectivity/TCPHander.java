@@ -5,17 +5,21 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
+import algorithm.ByteArrayTransforms;
 import configuration.Configuration;
 import core.Core;
+import datastructures.Packet;
 
 public class TCPHander extends Thread {
 	Socket clientSocket;
 	int id;
 	boolean server;
+	Packet p ;
 	TCPHander(Socket clientSocket,int id, boolean server) {
 		this.clientSocket=clientSocket;
 		this.id = id;
 		this.server = server;
+		p = new Packet();
 	}
 	/**Read line takes 1 argument
 	 * InputStreamReader isr
@@ -86,52 +90,57 @@ public class TCPHander extends Thread {
 			    OutputStreamWriter out = new OutputStreamWriter(clientSocket.getOutputStream());
 			    //BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			    InputStreamReader in = new InputStreamReader(clientSocket.getInputStream());
-			    if(server) {
-				    out.write("AnonFS "+Configuration.version+"\n");
-				    out.flush();
-			    }
+//			    if(server) {
+//				    out.write("AnonFS "+Configuration.version+"\n");
+//				    out.flush();
+//			    }
 			    while(true) {
 			    	int count=0;
-			    	byte line [] = readLine(in);
-			    	if(line==null) {
-			    		Core.logManager.log(this.getClass().getName(), "IP: " + clientSocket.getInetAddress().getHostAddress()  + " Client "+id+" disconnected!");
-			    		return;
-			    	}
-			    	String message = new String(line);
+			    	byte [] packet = p.readInputStreamPacket(in);
+			    	String message = new String(p.getData());
+//			    	byte line [] = readLine(in);
+//			    	if(line==null) {
+//			    		Core.logManager.log(this.getClass().getName(), "IP: " + clientSocket.getInetAddress().getHostAddress()  + " Client "+id+" disconnected!");
+//			    		return;
+//			    	}
+//			    	String message = new String(line);
+			    	
 			    	//Enable the below line to log every message
-			    	//Core.logManager.log(this.getClass().getName(), "Got String:"+message);
-			    	if(message.compareTo("info")==0) {
-			    		Core.logManager.log(this.getClass().getName(), "ClientID:"+id+" asked info");
-			    		out.write("AnonFS "+Configuration.version+"\n");
-			    		out.flush();
-			    	}
-			    	else if(message.compareTo("GetPeerList")==0) {
-			    		out.write("Not Implemented!"+"\n");
-			    		out.flush();
-			    		//TODO Implement GetPeerList
-			    	}
-			    	else if(message.startsWith("PushPiece")) {
-			    		out.write("Not Implemented!"+"\n");
-			    		out.flush();
-			    		// TODO Implement PushPiece
-			    	}
-			    	else if(message.startsWith("GetPiece")) {
-			    		out.write("Not Implemented!"+"\n");
-			    		out.flush();
-			    		// TODO Implement GetPiece
-			    	}
-			    	else if(message.startsWith("FindPiece")) {
-			    		out.write("Not Implemented!"+"\n");
-			    		out.flush();
-			    		// TODO Implement FindPiece
-			    	}
-			    	else if(message.startsWith("MyIP")) {
-			    		out.write(clientSocket.getInetAddress().getHostAddress()+"\n");
-			    		out.flush();
-			    	}
-			    	else {
-			    		out.write("Invalid command!"+"\n");
-			    		out.flush();
+			    	Core.logManager.log(this.getClass().getName(), "Got String:"+message);
+			    	if(p.getRequestFlag()==Packet.REQUEST) {
+				    	if(message.compareTo("info")==0) {
+				    		Core.logManager.log(this.getClass().getName(), "ClientID:"+id+" asked info");
+				    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray("AnonFS "+Configuration.version+"\n"), Packet.REPLY, 1)));
+				    		out.flush();
+				    	}
+				    	else if(message.compareTo("GetPeerList")==0) {
+				    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1)));
+				    		out.flush();
+				    		//TODO Implement GetPeerList
+				    	}
+				    	else if(message.startsWith("PushPiece")) {
+				    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1)));
+				    		out.flush();
+				    		// TODO Implement PushPiece
+				    	}
+				    	else if(message.startsWith("GetPiece")) {
+				    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1)));
+				    		out.flush();
+				    		// TODO Implement GetPiece
+				    	}
+				    	else if(message.startsWith("FindPiece")) {
+				    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1)));
+				    		out.flush();
+				    		// TODO Implement FindPiece
+				    	}
+				    	else if(message.startsWith("MyIP")) {
+				    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray(clientSocket.getInetAddress().getHostAddress()+"\n"), Packet.REPLY, 1)));
+				    		out.flush();
+				    	}
+				    	else {
+			    			out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray("Invalid command!"+"\n"), Packet.REPLY, 1)));
+				    		out.flush();
+				    	}
 			    	}
 			    	// TODO write what to do here
 			    }

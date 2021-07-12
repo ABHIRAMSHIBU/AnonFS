@@ -3,7 +3,9 @@ package datastructures;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Set;
 
 import connectivity.TCPHander;
 
@@ -173,5 +175,15 @@ public class PeerDataHandler{
 		else {
 			return false;
 		}
+	}
+	/**
+	 * Returns the list of peers in the PeerDataHander
+	 * @return
+	 */
+	public LinkedList<String> getPeers() {
+		Set<String> keys = data.keySet();
+		LinkedList<String> keys_list = new LinkedList<String>(keys);
+		//String [] keys_array = (String[]) keys.toArray();
+		return keys_list;
 	}
 }

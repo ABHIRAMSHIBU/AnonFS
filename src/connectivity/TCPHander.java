@@ -135,7 +135,15 @@ public class TCPHander extends Thread {
 					    		out.flush();
 					    	}
 					    	else if(message.compareTo("GetPeerList")==0) {
-					    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1)));
+					    		String peerString="";
+					    		LinkedList<String> peerList = Core.pdh.getPeers();
+					    		for(int i=0;i<peerList.size();i++) {
+					    			peerString+=peerList.get(i);
+					    			if(i+1<peerList.size()) {
+					    				peerString+="\n";
+					    			}
+					    		}
+					    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray(peerString), Packet.REPLY, 1)));
 					    		out.flush();
 					    		//TODO Implement GetPeerList
 					    	}

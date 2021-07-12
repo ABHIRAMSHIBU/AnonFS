@@ -2,6 +2,7 @@ package datastructures;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.SocketException;
 
 import core.Core;
 
@@ -163,29 +164,39 @@ public class Packet {
 	 * @throws IOException
 	 */
 	public byte [] readInputStreamPacket(InputStreamReader in) throws IOException {
-		// First 8 bytes are length so read it.
-		char sizearray[]=new char[8];
-		//Core.logManager.log(this.getClass().getName(), "Reading");
-		in.read(sizearray,0,8);
-		//Core.logManager.log(this.getClass().getName(), "Read");
-		int size=0;
-		for(int i=0;i<8;i++) {
-			byte b = (byte)sizearray[i];
-			size = size | (Byte.toUnsignedInt(b)<<(i*8));
-			//Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(b));
+		try {
+			// First 8 bytes are length so read it.
+			char sizearray[]=new char[8];
+			//Core.logManager.log(this.getClass().getName(), "Reading");
+			in.read(sizearray,0,8);
+			//Core.logManager.log(this.getClass().getName(), "Read");
+			int size=0;
+			for(int i=0;i<8;i++) {
+				byte b = (byte)sizearray[i];
+				size = size | (Byte.toUnsignedInt(b)<<(i*8));
+				//Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(b));
+			}
+			//Core.logManager.log(this.getClass().getName(), "Got size "+size);
+			char packet[]=new char[size];
+			in.read(packet,8,size-8);
+			for(int i=0;i<8;i++) {
+				packet[i]=sizearray[i];
+			}
+			byte packet_byte[]=new byte[size];
+			for(int i=0;i<size;i++) {
+				packet_byte[i]=(byte)packet[i];
+			}
+			decodePacket((byte [])packet_byte);
+			return packet_byte;
 		}
-		//Core.logManager.log(this.getClass().getName(), "Got size "+size);
-		char packet[]=new char[size];
-		in.read(packet,8,size-8);
-		for(int i=0;i<8;i++) {
-			packet[i]=sizearray[i];
+		catch(IndexOutOfBoundsException e) {
+			Core.logManager.critical(this.getClass().getName(), "Got "+e.toString()+" treating as socket closed");
+			return null;
 		}
-		byte packet_byte[]=new byte[size];
-		for(int i=0;i<size;i++) {
-			packet_byte[i]=(byte)packet[i];
+		catch(SocketException e) {
+			Core.logManager.log(this.getClass().getName(), "Got "+e.toString()+" treating as socket closed");
+			return null;
 		}
-		decodePacket((byte [])packet_byte);
-		return packet_byte;
 	}
 	/**
 	 * Fetches request flag from the flags of last packet.

@@ -16,15 +16,16 @@ public class TCPHander extends Thread {
 	Socket clientSocket;
 	int id;
 	boolean server;
-	Packet p ;
+	public Packet p ;
 	TCPHander(Socket clientSocket,int id, boolean server) throws IOException {
 		this.clientSocket=clientSocket;
 		this.id = id;
 		this.server = server;
 		p = new Packet();
 		Queue<Object> q = new LinkedList<Object>();
+		// TODO: Do something when the conflict comes.. May be prefer newest connection
 		if(! Core.pdh.entryExists(clientSocket.getInetAddress().getHostAddress())) {
-			Core.pdh.addPeer(clientSocket.getInetAddress().getHostAddress(), server, new OutputStreamWriter(clientSocket.getOutputStream()), q);
+			Core.pdh.addPeer(clientSocket.getInetAddress().getHostAddress(), server, new OutputStreamWriter(clientSocket.getOutputStream()), q, this);
 			Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" added to Peer DB");
 		}
 		else {
@@ -107,7 +108,7 @@ public class TCPHander extends Thread {
 			    while(true) {
 			    	int count=0;
 			    	byte [] packet = p.readInputStreamPacket(in);
-			    	String message = new String(p.getData());
+			    	String message = new String(p.getDecodedData());
 //			    	byte line [] = readLine(in);
 //			    	if(line==null) {
 //			    		Core.logManager.log(this.getClass().getName(), "IP: " + clientSocket.getInetAddress().getHostAddress()  + " Client "+id+" disconnected!");
@@ -117,7 +118,7 @@ public class TCPHander extends Thread {
 			    	
 			    	//Enable the below line to log every message
 			    	Core.logManager.log(this.getClass().getName(), "Got String:"+message);
-			    	if(p.getRequestFlag()==Packet.REQUEST) {
+			    	if(p.getDecodedRequestFlag()==Packet.REQUEST) {
 				    	if(message.compareTo("info")==0) {
 				    		Core.logManager.log(this.getClass().getName(), "ClientID:"+id+" asked info");
 				    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray("AnonFS "+Configuration.version+"\n"), Packet.REPLY, 1)));

@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Queue;
 
+import connectivity.TCPHander;
+
 public class PeerDataHandler{
 	HashMap<String, ArrayList<Object>> data;
 	/**data has a String and ArrayList
@@ -30,13 +32,16 @@ public class PeerDataHandler{
 	 * inconnect if connection is inbound, it needs to be true
 	 * outputStream which is where we can write requests to
 	 * replyQueue is where send request answers are spooled.
+	 * tcpHandler is the hander which handles connection of
+	 * the peer.
 	 * @param peerIP
 	 * @param inconnect
 	 * @param outputStream
 	 * @param replyQueue
+	 * @param tcpHandler
 	 * @return
 	 */
-	public boolean addPeer(String peerIP,boolean inconnect, OutputStreamWriter outputStream, Queue<Object> replyQueue) {
+	public boolean addPeer(String peerIP,boolean inconnect, OutputStreamWriter outputStream, Queue<Object> replyQueue, TCPHander tcpHandler) {
 		if(!data.containsKey(peerIP)) {
 			ArrayList<Object> al = new ArrayList<Object>();
 			int id = 0;
@@ -44,12 +49,14 @@ public class PeerDataHandler{
 			al.add(1, inconnect);
 			al.add(2, outputStream);
 			al.add(3, replyQueue);
+			al.add(4, tcpHandler);
 			data.put(peerIP, al);
 			return true;
 		}
 		else {
 			return false;
 		}
+		//TODO:  Remove unused stuff from Peer Data Handler
 	}
 	/** 
 	 * Returns true if removal was success else returns false
@@ -77,6 +84,16 @@ public class PeerDataHandler{
 		return id;
 	}
 	/**
+	 * Returns TCPHander that handles the IP, if not valid no idea about behavior
+	 * @param peerIP
+	 * @return
+	 */
+	public TCPHander getTCPHander(String peerIP) {
+		ArrayList<Object> al = data.get(peerIP);
+		TCPHander tcpHandler = (TCPHander) al.get(4);
+		return tcpHandler;
+	}
+	/**
 	 * Returns in which is a boolean which says connection was inbound or outbound given a valid peer, if not valid no idea about behavior
 	 * @param peerIP
 	 * @return
@@ -86,6 +103,7 @@ public class PeerDataHandler{
 		boolean inconn = (boolean) al.get(1);
 		return inconn;
 	}
+	
 	/**
 	 * Returns OutputStreamWriter of a peer, basically it will give you a connection to write to peer given a valid peer, if not valid no idea about behavior
 	 * @param peerIP

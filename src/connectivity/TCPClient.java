@@ -130,7 +130,7 @@ public class TCPClient{
 		p.readInputStreamPacket(in);
 		System.out.println("Reading complete");
 		Core.logManager.log(this.getClass().getName(), "Reading complete");
-		System.out.println("Got data "+new String(ByteArrayTransforms.toCharArray(p.getData())));
+		System.out.println("Got data "+new String(ByteArrayTransforms.toCharArray(p.getDecodedData())));
 		// TODO: Remove reading request
 	}
 	public TCPClient() {

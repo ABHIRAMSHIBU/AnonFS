@@ -111,42 +111,49 @@ public class Packet {
 	 * Get Time To Leave from network
 	 * @return TTL last packet integer
 	 */
-	public int getTTL() {
+	public int getDecodedTTL() {
 		return this._ttl;
 	}
 	/**
 	 * Get Packet Data
 	 * @return Data in last packet byte array
 	 */
-	public byte[] getData() {
+	public byte[] getDecodedData() {
 		return this._data;
 	}
 	/**
 	 * Get Flags
 	 * @return Flags of last packet byte array
 	 */
-	public byte getFlags() {
+	public byte getDecodedFlags() {
 		return this._flags;
 	}
 	/**
 	 * Get Packet ID
-	 * @return ID of last packet in byte
+	 * @return ID of last packet decoded in byte
 	 */
-	public byte getID() {
+	public byte getDecodedID() {
 		return this._id;
+	}
+	/**
+	 * Get Packet ID
+	 * @return ID of last packet created in byte
+	 */
+	public byte getCreatedID() {
+		return (byte) ((this.id-1)%256);
 	}
 	/**
 	 * Get Size of Packet
 	 * @return Size of the packet in integer
 	 */
-	public int getSize() {
+	public int getDecodedSize() {
 		return this._size;
 	}
 	/**
 	 * Get Size of Padding
 	 * @return Size of padding in last packet in integer
 	 */
-	public int getPadding() {
+	public int getDecodedPadding() {
 		return this._padding;
 	}
 	/**
@@ -184,21 +191,21 @@ public class Packet {
 	 * Fetches request flag from the flags of last packet.
 	 * @return - a byte request flag
 	 */
-	public byte getRequestFlag() {
+	public byte getDecodedRequestFlag() {
 		return (byte) (_flags & 0x01);
 	}
 	/**
 	 * Fetches Base64Payload flag from the flags of last packet.
 	 * @return - a byte Base64PayloadFlag flag
 	 */
-	public byte getBase64PayloadFlag() {
+	public byte getDecodedBase64PayloadFlag() {
 		return (byte) ((_flags & 0x02)>>1);
 	}
 	/**
 	 * Fetches BreakConnection flag from the flags of last packet.
 	 * @return - a byte BreakConnection flag
 	 */
-	public byte getBreakConnectionFlag() {
+	public byte getDecodedBreakConnectionFlag() {
 		return (byte) ((_flags & 0x04)>>2);
 	}
 }

@@ -24,7 +24,7 @@ public class TCPHander extends Thread {
 		p = new Packet();
 		Queue<Object> q = new LinkedList<Object>();
 		if(! Core.pdh.entryExists(clientSocket.getInetAddress().getHostAddress())) {
-			Core.pdh.addPeer(clientSocket.getInetAddress().getAddress().toString(), server, new OutputStreamWriter(clientSocket.getOutputStream()), q);
+			Core.pdh.addPeer(clientSocket.getInetAddress().getHostAddress(), server, new OutputStreamWriter(clientSocket.getOutputStream()), q);
 			Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" added to Peer DB");
 		}
 		else {

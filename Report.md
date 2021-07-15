@@ -1,6 +1,6 @@
 # Monthly Report for Month Jun 2021
 
-Latest Commit - > 2d5106d3ae7dc17b8562b1e39f70b1eab2c7eeba (TCP: Handler should now be seperated, socket is now bytes)[ date - 03/07/2021 ]
+Latest Commit - > 2d5106d3ae7dc17b8562b1e39f70b1eab2c7eeba (TCP: Handler should now be separated, socket is now bytes)[ date - 03/07/2021 ]
 
 ## Goals and basic debriefing 
 
@@ -21,7 +21,7 @@ Goals attained (including additional) -
 5. Docker- Create Docker Image for easy deployment
 6. RSA Encryption - Add classes for future use for identity management (Host, Client, User Pending)
 7. Configuration Management - Create a configuration file and parser (using ini4j as parser).
-8. Log Management - Created a class for efficient log creation and management with levels of criticalilty.
+8. Log Management - Created a class for efficient log creation and management with levels of criticality.
 9. Peer Management - Created a class for storing and keeping peer information.
 10. Tree Binary - Hashmap shortcut tree logic for faster lookup on a hashmap (may be useless in future). Used for storing piece information on disk and efficiently finding piece on disk.
 

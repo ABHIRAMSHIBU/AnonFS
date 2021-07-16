@@ -74,10 +74,10 @@ public class Packet {
 		// Get size
 		for(int i=0;i<8;i++) {
 			size = size | (Byte.toUnsignedInt(message[i])<<(i*8));
-			Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(message[i]));
+			//Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(message[i]));
 		}
 		this._size=size;
-		Core.logManager.log(this.getClass().getName(), "Size is "+size);
+		//Core.logManager.log(this.getClass().getName(), "Size is "+size);
 		byte[] data = new byte[size-20];
 		this._data=data;
 		// Get flags
@@ -85,21 +85,21 @@ public class Packet {
 		this._flags=flags;
 		// Get id
 		byte id=message[9];
-		Core.logManager.log(this.getClass().getName(), "ID is "+id);
+		//Core.logManager.log(this.getClass().getName(), "ID is "+id);
 		this._id=id;
 		// Get padding 
 		for(int i=0;i<8;i++) {
 			padding = padding | (Byte.toUnsignedInt(message[i+10])<<(i*8));
-			Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(message[i+10]));
+			//Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(message[i+10]));
 		}
-		Core.logManager.log(this.getClass().getName(), "Padding is "+padding);
+		//Core.logManager.log(this.getClass().getName(), "Padding is "+padding);
 		this._padding=padding;
 		// Get TTL
 		for(int i=0;i<2;i++) {
 			ttl = ttl | (Byte.toUnsignedInt(message[i+18])<<(i*8));
-			Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(message[i+18]));
+			//Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(message[i+18]));
 		}
-		Core.logManager.log(this.getClass().getName(), "ttl is "+ttl);
+		//Core.logManager.log(this.getClass().getName(), "ttl is "+ttl);
 		this._ttl=ttl;
 		// Get data
 		for(int i=0;i<data.length;i++) {

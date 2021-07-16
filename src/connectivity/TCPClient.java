@@ -105,6 +105,11 @@ public class TCPClient{
 		run=true;
 		return z;
 	}
+	/** 
+	 * Sends request and gets reply using packet scheme
+	 * @param data
+	 * @throws IOException
+	 */
 	public void sendRequest(String data) throws IOException {
 		Packet p = new Packet();
 		byte data_array[] = new byte[data.length()];
@@ -112,7 +117,7 @@ public class TCPClient{
 			data_array[i] = (byte)data.charAt(i);
 		}
 		byte packet[]=p.createPacket(data_array, Packet.REQUEST, 1);
-		byte id = p.getCreateID();
+		byte id = p.getDecodedID();
 		char packet_char[] = new char[packet.length];
 		for(int i = 0; i<packet.length;i++) {
 			packet_char[i]=(char)packet[i];
@@ -126,7 +131,8 @@ public class TCPClient{
 		p.readInputStreamPacket(in);
 		System.out.println("Reading complete");
 		Core.logManager.log(this.getClass().getName(), "Reading complete");
-		System.out.println("Got data "+new String(ByteArrayTransforms.toCharArray(p.getData())));
+		System.out.println("Got data "+new String(ByteArrayTransforms.toCharArray(p.getDecodedData())));
+		// TODO: Remove reading request
 	}
 	public TCPClient() {
 	

@@ -18,6 +18,7 @@ public class TCPHander extends Thread {
 	int id;
 	boolean server;
 	public Packet p ;
+	boolean redudantConnection = false;
 	TCPHander(Socket clientSocket,int id, boolean server) throws IOException {
 		this.clientSocket=clientSocket;
 		this.id = id;
@@ -26,11 +27,17 @@ public class TCPHander extends Thread {
 		Queue<Object> q = new LinkedList<Object>();
 		// TODO: Do something when the conflict comes.. May be prefer newest connection
 		if(! Core.pdh.entryExists(clientSocket.getInetAddress().getHostAddress())) {
-			Core.pdh.addPeer(clientSocket.getInetAddress().getHostAddress(), server, new OutputStreamWriter(clientSocket.getOutputStream()), q, this);
+			Core.pdh.addPeer(clientSocket.getInetAddress().getHostAddress(), server, new OutputStreamWriter(clientSocket.getOutputStream()), q, this, true);
 			Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" added to Peer DB");
 		}
 		else {
-			Core.logManager.critical(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" already exists in Peer DB! (May be redundant connection)");
+			if(Core.pdh.getConnected(clientSocket.getInetAddress().getHostAddress())) {
+				Core.logManager.critical(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" already exists in Peer DB! (May be redundant connection)");
+				redudantConnection = true;
+			}
+			else {
+				Core.pdh.setConnected(clientSocket.getInetAddress().getHostAddress(), true);
+			}
 		}
 	}
 	/**Read line takes 1 argument
@@ -98,6 +105,16 @@ public class TCPHander extends Thread {
 		return retbuff;
 	}
 	public void run() {
+		if(redudantConnection) {
+			Core.logManager.critical(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" is flagged redudent, TCPHander Quitting");
+			try {
+				clientSocket.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return;
+		}
 		try { 
 			    OutputStreamWriter out = new OutputStreamWriter(clientSocket.getOutputStream());
 			    //BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -112,7 +129,8 @@ public class TCPHander extends Thread {
 			    	if(packet==null) {
 			    		//End of stream reached and socket is dead, so packup
 			    		Core.logManager.log(this.getClass().getName(), "IP: " + clientSocket.getInetAddress().getHostAddress()  + " Client "+id+" disconnected!");
-			    		Core.pdh.removePeer(clientSocket.getInetAddress().getHostAddress());
+			    		//Core.pdh.removePeer(clientSocket.getInetAddress().getHostAddress());
+			    		Core.pdh.setConnected(clientSocket.getInetAddress().getHostAddress(),false);
 			    		Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" removed from Peer DB");
 			    		clientSocket.close();
 			    		break;

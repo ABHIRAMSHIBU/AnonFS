@@ -25,9 +25,11 @@ public class PeerDataHandler{
 	public PeerDataHandler() {
 		this.create();
 	}
+	
 	public void create() {
 		data = new HashMap<String, ArrayList<Object>>();
 	}
+	
 	/**
 	 * Adds a peer into the data handler, it will need
 	 * peerIP which is ip of the peer as string 
@@ -43,7 +45,7 @@ public class PeerDataHandler{
 	 * @param tcpHandler
 	 * @return
 	 */
-	public boolean addPeer(String peerIP,boolean inconnect, OutputStreamWriter outputStream, Queue<Object> replyQueue, TCPHander tcpHandler) {
+	public boolean addPeer(String peerIP,boolean inconnect, OutputStreamWriter outputStream, Queue<Object> replyQueue, TCPHander tcpHandler, boolean connected) {
 		if(!data.containsKey(peerIP)) {
 			ArrayList<Object> al = new ArrayList<Object>();
 			int id = 0;
@@ -52,6 +54,7 @@ public class PeerDataHandler{
 			al.add(2, outputStream);
 			al.add(3, replyQueue);
 			al.add(4, tcpHandler);
+			al.add(5, connected);
 			data.put(peerIP, al);
 			return true;
 		}
@@ -107,6 +110,17 @@ public class PeerDataHandler{
 	}
 	
 	/**
+	 * Returns in which is a boolean which says connection was inbound or outbound given a valid peer, if not valid no idea about behavior
+	 * @param peerIP
+	 * @return
+	 */
+	public boolean getConnected(String peerIP) {
+		ArrayList<Object> al = data.get(peerIP);
+		boolean inconn = (boolean) al.get(5);
+		return inconn;
+	}
+	
+	/**
 	 * Returns OutputStreamWriter of a peer, basically it will give you a connection to write to peer given a valid peer, if not valid no idea about behavior
 	 * @param peerIP
 	 * @return
@@ -116,6 +130,7 @@ public class PeerDataHandler{
 		OutputStreamWriter osw = (OutputStreamWriter) al.get(2);
 		return osw;
 	}
+	
 	/**
 	 * Returns Queue of the all the reply packets, if not valid no idea about behavior
 	 * @param peerIP
@@ -126,6 +141,7 @@ public class PeerDataHandler{
 		Queue<Object> q = (Queue<Object>) al.get(3);
 		return q;
 	}
+	
 	/**
 	 * Sets id which should be of next packet given a valid peer, if not valid no idea about behavior
 	 * @param peerIP
@@ -135,6 +151,7 @@ public class PeerDataHandler{
 		ArrayList<Object> al = data.get(peerIP);
 		al.set(0, id);
 	}
+	
 	/**
 	 * Sets id which should be of next packet given a valid peer, if not valid no idea about behavior
 	 * @param peerIP
@@ -144,6 +161,7 @@ public class PeerDataHandler{
 		ArrayList<Object> al = data.get(peerIP);
 		al.set(1, in);
 	}
+	
 	/**
 	 * Sets OutputStreamWriter which should be the new OutputStreamWriter of peer given a valid peer, if not valid no idea about behavior
 	 * @param peerIP
@@ -153,6 +171,7 @@ public class PeerDataHandler{
 		ArrayList<Object> al = data.get(peerIP);
 		al.set(2, osw);
 	}
+	
 	/**
 	 * Sets reply Queue of a peer given a valid peer, if not valid no idea about behavior
 	 * @param peerIP
@@ -163,6 +182,18 @@ public class PeerDataHandler{
 		ArrayList<Object> al = data.get(peerIP);
 		al.set(3, q);
 	}
+	
+	/**
+	 * Sets connected status of a peer given a valid peer, if not valid no idea about behavior
+	 * @param peerIP
+	 * @param connected
+	 */
+	public void setConnected(String peerIP,boolean connected) {
+		/** Sets reply Queue of a peer given a valid peer, if not valid no idea about behavior **/
+		ArrayList<Object> al = data.get(peerIP);
+		al.set(5, connected);
+	}
+	
 	/**
 	 * Returns true if peer already exists
 	 * @param peerIP
@@ -176,6 +207,7 @@ public class PeerDataHandler{
 			return false;
 		}
 	}
+	
 	/**
 	 * Returns the list of peers in the PeerDataHander
 	 * @return
@@ -185,5 +217,57 @@ public class PeerDataHandler{
 		LinkedList<String> keys_list = new LinkedList<String>(keys);
 		//String [] keys_array = (String[]) keys.toArray();
 		return keys_list;
+	}
+	
+	/**
+	 * Returns the list of peers which are connected
+	 * @return
+	 */
+	public LinkedList<String> getConnectedPeers(){
+		Set<String> keys = data.keySet();
+		LinkedList<String> keys_list = new LinkedList<String>(keys);
+		LinkedList<String> connected_list = new LinkedList<String>();
+		for(int i=0;i<keys_list.size();i++) {
+			String current = keys_list.get(i);
+			boolean connected = getConnected(current);
+			if(connected==true) {
+				connected_list.add(keys_list.get(i));
+			}
+		}
+		return connected_list;
+	}
+	
+	/**
+	 * Returns the count of connected peers
+	 * @return
+	 */
+	public int getConnectedPeersCount() {
+		return getConnectedPeers().size();
+	}
+	
+	/**
+	 * Returns the list of peers which are disconnected
+	 * @return
+	 */
+	public LinkedList<String> getDisconnectedPeers(){
+		Set<String> keys = data.keySet();
+		LinkedList<String> keys_list = new LinkedList<String>(keys);
+		LinkedList<String> disconnected_list = new LinkedList<String>();
+		for(int i=0;i<keys_list.size();i++) {
+			String current = keys_list.get(i);
+			boolean connected = getConnected(current);
+			if(connected==false) {
+				disconnected_list.add(keys_list.get(i));
+			}
+		}
+		return disconnected_list;
+	}
+	
+	/**
+	 * Returns the count of disconnected peers
+	 * @return
+	 */
+	public int getDisconnectedPeersCount() {
+		return getDisconnectedPeers().size();
 	}
 }

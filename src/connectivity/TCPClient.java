@@ -143,7 +143,8 @@ public class TCPClient{
 					socket=pingSocket;
 					status=true;
 					//TODO: Need ID here instead of port
-					TCPHander tcph = new TCPHander(pingSocket, port, false);
+					long id = Core.cIDHandle.genID();
+					TCPHander tcph = new TCPHander(pingSocket, id, false);
 					tcph.start();
 			} catch (IOException e) {
 				e.printStackTrace();

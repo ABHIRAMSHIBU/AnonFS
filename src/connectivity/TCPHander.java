@@ -15,13 +15,13 @@ import datastructures.Packet;
 
 public class TCPHander extends Thread {
 	Socket clientSocket;
-	int id;
+	long id;
 	boolean server;
 	public Packet p ;
 	boolean redudantConnection = false;
-	TCPHander(Socket clientSocket,int id, boolean server) throws IOException {
+	TCPHander(Socket clientSocket,long id2, boolean server) throws IOException {
 		this.clientSocket=clientSocket;
-		this.id = id;
+		this.id = id2;
 		this.server = server;
 		p = new Packet();
 		Queue<Object> q = new LinkedList<Object>();

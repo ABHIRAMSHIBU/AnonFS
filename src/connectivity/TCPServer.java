@@ -13,6 +13,7 @@ public class TCPServer {
 			    serverSocket = new ServerSocket(portNumber);
 			    while(true) {
 			    	Socket clientSocket = serverSocket.accept();
+			    	long id = Core.cIDHandle.genID();
 			    	Core.logManager.log(this.getClass().getName(), "IP: " + clientSocket.getInetAddress().getHostAddress() + " Accepted Connection "+count);
 			    	(new TCPHander(clientSocket,count,true)).start();
 			    	count++;

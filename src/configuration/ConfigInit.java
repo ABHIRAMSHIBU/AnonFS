@@ -10,6 +10,7 @@ import core.Core;
 public class ConfigInit {
 	PrintWriter pw ;
 	File configFile = new File("AnonFSd.conf");
+	Ini ini;
 	public ConfigInit() throws IOException{
 		/**Its supposed to initialize the configuration for basic configuration
 		 * */
@@ -122,7 +123,10 @@ public class ConfigInit {
 		else {
 			Core.logManager.log(this.getClass().getName(), "Configuration file exists, reading.");
 		}
-		Ini ini = new Ini(configFile);
+		ini = new Ini(configFile);
 		Core.logManager.log(this.getClass().getName(),"Configuration Parsed-> "+ini.toString());
+	}
+	public String getBootStrapPeer() {
+		return ini.fetch("network", "BOOTSTRAP_PEER");
 	}
 }

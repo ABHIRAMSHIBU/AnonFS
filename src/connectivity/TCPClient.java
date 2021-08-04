@@ -142,7 +142,11 @@ public class TCPClient{
 					pingSocket = new Socket(Configuration.DEFAULT_IP, Configuration.DEFAULT_PORT);
 					socket=pingSocket;
 					status=true;
+					//TODO: Need ID here instead of port
+					TCPHander tcph = new TCPHander(pingSocket, port, false);
+					tcph.start();
 			} catch (IOException e) {
+				e.printStackTrace();
 				System.out.println("TCPClient Error occured!");
 				status=false;
 			}
@@ -159,6 +163,9 @@ public class TCPClient{
 					pingSocket = new Socket(ip, port);
 					socket=pingSocket;
 					status=true;
+					//TODO: Need ID here instead of port
+					TCPHander tcph = new TCPHander(pingSocket, port, false);
+					tcph.start();
 			} catch (IOException e) {
 				System.out.println("TCPClient Error occured for "+ip);
 				status=false;

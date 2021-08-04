@@ -197,7 +197,7 @@ public class TCPHander extends Thread {
 			    	catch(SocketException e) {
 			    		//End of stream reached and socket is dead, so packup
 			    		Core.logManager.log(this.getClass().getName(), "IP: " + clientSocket.getInetAddress().getHostAddress()  + " Client "+id+" disconnected!");
-			    		Core.pdh.removePeer(clientSocket.getInetAddress().getHostAddress());
+			    		Core.pdh.setConnected(clientSocket.getInetAddress().getHostAddress(),false);
 			    		Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" removed from Peer DB");
 			    		clientSocket.close();
 			    		break;

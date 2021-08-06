@@ -1,6 +1,6 @@
 # Monthly Report for Month July 2021
 
-Latest Commit -> b715b310011c9fc37794d18acc0253311d347524 (TCP: Added ID creation) [ date - 05-08-2021 ]
+Latest Commit -> d34f4faf18b70903b500c66fb155d463c106bacc ([Documentation: Fixed image absolute path to relative](https://github.com/ABHIRAMSHIBU/AnonFS/commit/d34f4faf18b70903b500c66fb155d463c106bacc)) [ date - 05-08-2021 ]
 
 ## Goals and basic debriefing 
 
@@ -19,6 +19,75 @@ Goals attained-
 3. Autoconnection - Brought up autoreconnection module. 
 4. State diagram created.
 
+Goals missed-
+
+1. Encryption - Bring up piece encryption and identity management
+2. FileToPiece - Bringup file to piece.
+
+## Commits
+
+1. Documentation
+
+   1) [Documentation: Report for the project (JUN)](https://github.com/ABHIRAMSHIBU/AnonFS/commit/ba9c3097a9dd4abce315d3fe9e593f2890ab815d)
+
+   2) [Documentation: Added state diagram and changes to others](https://github.com/ABHIRAMSHIBU/AnonFS/commit/a40ae61332bfe891e3fd498dd93323dac8896dba)
+
+   3) [Documentation: Added images to add to Report.md](https://github.com/ABHIRAMSHIBU/AnonFS/commit/bcd47c76a50db82c41e5950ac276b8708c3e8295)
+
+   4) [Documentation: Report Generated for July](https://github.com/ABHIRAMSHIBU/AnonFS/commit/4f2c4dc79fceca485e0b0e8ef7b5a00380837b37)
+
+   5) [Documentation: Fixed image absolute path to relative](https://github.com/ABHIRAMSHIBU/AnonFS/commit/d34f4faf18b70903b500c66fb155d463c106bacc)
+
+2. Networking
+
+   1) [Packet:Added packet parser and constructor](https://github.com/ABHIRAMSHIBU/AnonFS/commit/cfa14b76e1097920b3a78aa5637f2eb70b4700fd)
+
+   2) [Packet: Comments added and modified](https://github.com/ABHIRAMSHIBU/AnonFS/commit/7e34479cf3396c7f20dc60019b38624d4b510f91)
+
+   3) [Packet: Now it has means to get all piece of information](https://github.com/ABHIRAMSHIBU/AnonFS/commit/1338c5c35313d31b6d149d346db7bb28a3538924)
+
+   4) [Packet: Now it can read packet given input stream](https://github.com/ABHIRAMSHIBU/AnonFS/commit/9930b2b4dc73dbf9a7c15c7d2a5bbeb191adff09)
+
+   5) [TCPClient: Now use packet to send request](https://github.com/ABHIRAMSHIBU/AnonFS/commit/5d8c79b6802f79ff0d6badb69b24d4f4fa46fdb4)
+
+   6) [TCPHander: Now uses packet to send and recieve](https://github.com/ABHIRAMSHIBU/AnonFS/commit/7936504870111b50bee8e148a23dec0871388960)            
+
+   7) [Packet: Added rest of flags, base64 and breakconnection](https://github.com/ABHIRAMSHIBU/AnonFS/commit/ad0fd6272d5bbaa170880cd288b53c485449ff61)
+
+   8) [TCP: Added PeerDataHander](https://github.com/ABHIRAMSHIBU/AnonFS/commit/c749de6c2f6226304a9607e59d11ac2034dd3f02)
+
+   9) [TCPHander: Typo caused not to find existing entry.. fixed Bug](https://github.com/ABHIRAMSHIBU/AnonFS/commit/530cf5359cf4c7e790557d5fe48ead39df877691) [fix](https://github.com/ABHIRAMSHIBU/AnonFS/commit/530cf5359cf4c7e790557d5fe48ead39df877691)
+
+   10) [Packet: Added functionality to get id and renamed functions to decode](https://github.com/ABHIRAMSHIBU/AnonFS/commit/238b8b3d80feb524cbc955d063f500b530048ca0)
+
+   11) [TCP: Termination of connections are handled](https://github.com/ABHIRAMSHIBU/AnonFS/commit/82b9dc6ad7d9886a79b454149ba9c2aa3075da83)
+
+   12) [TCPHandler: GetPeerList is now implemented](https://github.com/ABHIRAMSHIBU/AnonFS/commit/dc279e5c288ec3bc549f8b1c0313e5913532d7f6)
+
+   13) [Packet: Disabled logging](https://github.com/ABHIRAMSHIBU/AnonFS/commit/e6ae2f244c46e65c960a9f2c3487ccc2d01f9137)
+
+   14) [TCPHandler: Set connected false, if disconnected](https://github.com/ABHIRAMSHIBU/AnonFS/commit/5d71d611701f8f6470cfa0dbd06ce3a416f62b77)
+
+   15) [TCP: Added ID creation](https://github.com/ABHIRAMSHIBU/AnonFS/commit/b715b310011c9fc37794d18acc0253311d347524)
+
+   16) [ConnectionIDHandler: Now handles ID for server and client](https://github.com/ABHIRAMSHIBU/AnonFS/commit/d49c008683e1b1ba00ae4ac19ece1049851c9179)
+
+3. Docker
+
+   1) [Docker: Added docker testnet autoscript](https://github.com/ABHIRAMSHIBU/AnonFS/commit/529ea6bb51d08b99b7eca0aab9787e6265eff6bd)
+
+4. Algorithms
+
+   1) [PeerDataHander: Fixed Commenting, created entryExists](https://github.com/ABHIRAMSHIBU/AnonFS/commit/1cbc07682e9dc89790794d34620934fe12310500)   
+
+   2) [AutoConnector: Class to autoconnect to peers](https://github.com/ABHIRAMSHIBU/AnonFS/commit/35acb1e476fe5764f8a1520d0cd70c55238cc714)
+
+5. Core
+
+   1) [Core: Config Parser variable and Auto Connector added](https://github.com/ABHIRAMSHIBU/AnonFS/commit/6e6399a9d6a613dc538d695bc1e04073575738b5)
+
+
+
 ## Diagrams
 
 ![image-20210806180402259](images/NFA_AnonFS)
@@ -27,7 +96,7 @@ Goals attained-
 
 # Monthly Report for Month Jun 2021
 
-Latest Commit - > 2d5106d3ae7dc17b8562b1e39f70b1eab2c7eeba (TCP: Handler should now be separated, socket is now bytes)[ date - 03/07/2021 ]
+Latest Commit - > 2d5106d3ae7dc17b8562b1e39f70b1eab2c7eeba ([TCP: Handler should now be seperated, socket is now bytes](https://github.com/ABHIRAMSHIBU/AnonFS/commit/2d5106d3ae7dc17b8562b1e39f70b1eab2c7eeba))[ date - 03/07/2021 ]
 
 ## Goals and basic debriefing 
 

@@ -21,9 +21,9 @@ Goals attained-
 
 ## Diagrams
 
-![image-20210806180402259](/home/abhiram/eclipse-workspace/AnonFS/images/NFA_AnonFS)
+![image-20210806180402259](images/NFA_AnonFS)
 
-
+![image-20210806180506774](images/NFA_AnonFS_disc)
 
 # Monthly Report for Month Jun 2021
 

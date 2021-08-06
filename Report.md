@@ -1,3 +1,30 @@
+# Monthly Report for Month July 2021
+
+Latest Commit -> b715b310011c9fc37794d18acc0253311d347524 (TCP: Added ID creation) [ date - 05-08-2021 ]
+
+## Goals and basic debriefing 
+
+Goals set- 
+
+1. Networking - Add a packet based handling scheme.
+2. Autoconnection - Bringup bootstrapping and automatic peer reconnection.
+3. FileToPiece - Bringup file to piece.
+4. Encryption - Bring up piece encryption and identity management
+5. Create A Sate Diagram
+
+Goals attained-
+
+1. Peer Handling - Find and add report disconnected and connected peers
+2. Networking - Added a packet based peer communication handler
+3. Autoconnection - Brought up autoreconnection module. 
+4. State diagram created.
+
+## Diagrams
+
+![image-20210806180402259](/home/abhiram/eclipse-workspace/AnonFS/images/NFA_AnonFS)
+
+
+
 # Monthly Report for Month Jun 2021
 
 Latest Commit - > 2d5106d3ae7dc17b8562b1e39f70b1eab2c7eeba (TCP: Handler should now be separated, socket is now bytes)[ date - 03/07/2021 ]

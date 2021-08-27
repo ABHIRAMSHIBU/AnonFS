@@ -15,6 +15,7 @@ public class Packet {
 	int _size;
 	int _padding;
 	int _ttl;
+	byte _refid;
 	public static final byte REPLY=1;
 	public static final byte REQUEST=0;
 	/** createPakcket when given a byte array will generate a packet.
@@ -24,7 +25,7 @@ public class Packet {
 	 * @param TTL - time to leave from network.
 	 * @return packet
 	 */
-	public byte[] createPacket(byte[] data,byte request,int TTL) {
+	public byte[] createPacket(byte[] data,byte request,int TTL,byte refid) {
 		byte base64Payload = 0;
 		byte breakConnection = 0;
 		byte flags = (byte) (request<<0 | base64Payload<<1 | breakConnection<<2);
@@ -39,6 +40,7 @@ public class Packet {
 		message[8]=flags;
 		// Set id
 		message[9]=id;
+		message[10]=refid;
 		if(id==255) { //Increment ID rollover
 			id=0;
 		}
@@ -47,16 +49,16 @@ public class Packet {
 		}
 		// Set padding to 0, currently unused
 		for(int i=0;i<8;i++) {
-			message[i+10]=0;
+			message[i+11]=0;
 		}
 		// Set TTL
 		for(int i=0;i<2;i++) {
-			message[i+18]=(byte) ((0xFF<<(i*8) & (TTL))>>(i*8));
+			message[i+19]=(byte) ((0xFF<<(i*8) & (TTL))>>(i*8));
 			//Core.logManager.log(this.getClass().getName(), "Byte at "+i+" is "+Byte.toUnsignedInt(message[i+18]));
 		}
 		// Set data
 		for(int i=0;i<data.length;i++) {
-			message[i+20]=data[i];
+			message[i+21]=data[i];
 		}
 		return message;
 	}
@@ -85,25 +87,27 @@ public class Packet {
 		this._flags=flags;
 		// Get id
 		byte id=message[9];
+		byte refid=message[10];
 		//Core.logManager.log(this.getClass().getName(), "ID is "+id);
 		this._id=id;
+		this._refid=refid;
 		// Get padding 
 		for(int i=0;i<8;i++) {
-			padding = padding | (Byte.toUnsignedInt(message[i+10])<<(i*8));
+			padding = padding | (Byte.toUnsignedInt(message[i+11])<<(i*8));
 			//Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(message[i+10]));
 		}
 		//Core.logManager.log(this.getClass().getName(), "Padding is "+padding);
 		this._padding=padding;
 		// Get TTL
 		for(int i=0;i<2;i++) {
-			ttl = ttl | (Byte.toUnsignedInt(message[i+18])<<(i*8));
+			ttl = ttl | (Byte.toUnsignedInt(message[i+19])<<(i*8));
 			//Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(message[i+18]));
 		}
 		//Core.logManager.log(this.getClass().getName(), "ttl is "+ttl);
 		this._ttl=ttl;
 		// Get data
 		for(int i=0;i<data.length;i++) {
-			data[i]=message[i+20];
+			data[i]=message[i+21];
 		}
 		this._data=data;
 		return data;
@@ -156,6 +160,13 @@ public class Packet {
 	 */
 	public int getDecodedPadding() {
 		return this._padding;
+	}
+	/**
+	 * Get the reference ID of packet in case of reply
+	 * @return Size of padding in last packet in integer
+	 */
+	public byte getDecodedrefid() {
+		return this._refid;
 	}
 	/**
 	 * Reads the packet from a socket InputStreamReader and decodes it

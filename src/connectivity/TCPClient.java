@@ -116,7 +116,7 @@ public class TCPClient{
 		for(int i = 0; i<data.length() ; i++) {
 			data_array[i] = (byte)data.charAt(i);
 		}
-		byte packet[]=p.createPacket(data_array, Packet.REQUEST, 1);
+		byte packet[]=p.createPacket(data_array, Packet.REQUEST, 1, (byte) 0);
 		byte id = p.getCreatedID();
 		char packet_char[] = new char[packet.length];
 		for(int i = 0; i<packet.length;i++) {

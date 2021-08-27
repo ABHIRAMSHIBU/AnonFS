@@ -149,7 +149,7 @@ public class TCPHander extends Thread {
 				    	if(p.getDecodedRequestFlag()==Packet.REQUEST) {
 					    	if(message.compareTo("info")==0) {
 					    		Core.logManager.log(this.getClass().getName(), "ClientID:"+id+" asked info");
-					    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray("AnonFS "+Configuration.version+"\n"), Packet.REPLY, 1)));
+					    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray("AnonFS "+Configuration.version+"\n"), Packet.REPLY, 1, p.getDecodedrefid())));
 					    		out.flush();
 					    	}
 					    	else if(message.compareTo("GetPeerList")==0) {
@@ -161,31 +161,31 @@ public class TCPHander extends Thread {
 					    				peerString+="\n";
 					    			}
 					    		}
-					    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray(peerString), Packet.REPLY, 1)));
+					    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray(peerString), Packet.REPLY, 1, p.getDecodedrefid())));
 					    		out.flush();
 					    		//TODO Implement GetPeerList
 					    	}
 					    	else if(message.startsWith("PushPiece")) {
-					    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1)));
+					    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1, p.getDecodedrefid())));
 					    		out.flush();
 					    		// TODO Implement PushPiece
 					    	}
 					    	else if(message.startsWith("GetPiece")) {
-					    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1)));
+					    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1, p.getDecodedrefid())));
 					    		out.flush();
 					    		// TODO Implement GetPiece
 					    	}
 					    	else if(message.startsWith("FindPiece")) {
-					    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1)));
+					    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1, p.getDecodedrefid())));
 					    		out.flush();
 					    		// TODO Implement FindPiece
 					    	}
 					    	else if(message.startsWith("MyIP")) {
-					    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray(clientSocket.getInetAddress().getHostAddress()+"\n"), Packet.REPLY, 1)));
+					    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray(clientSocket.getInetAddress().getHostAddress()+"\n"), Packet.REPLY, 1, p.getDecodedrefid())));
 					    		out.flush();
 					    	}
 					    	else {
-				    			out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray("Invalid command!"+"\n"), Packet.REPLY, 1)));
+				    			out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray("Invalid command!"+"\n"), Packet.REPLY, 1, p.getDecodedrefid())));
 					    		out.flush();
 					    	}
 				    	}

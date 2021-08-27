@@ -11,6 +11,7 @@ import java.util.Queue;
 import algorithm.ByteArrayTransforms;
 import configuration.Configuration;
 import core.Core;
+import datastructures.CallBackPromise;
 import datastructures.Packet;
 
 public class TCPHander extends Thread {
@@ -191,7 +192,24 @@ public class TCPHander extends Thread {
 				    	}
 				    	else {
 				    		// Queue Packet in reply queue.
-				    		Core.pdh.getReplyQueue(clientSocket.getInetAddress().getAddress().toString()).add(packet);
+				    		// Check if there is a thing waiting reply, if yes, inject data
+				    		Queue<Object> queue = Core.pdh.getReplyQueue(clientSocket.getInetAddress().getAddress().toString());
+				    		if(queue.size()>0) {
+				    			for(int i=0;i<queue.size();i++) { // Parse like a deck of cards
+				    				CallBackPromise cbp = (CallBackPromise) queue.remove();
+				    				if(cbp.refid!=p.getDecodedrefid()) {
+				    					queue.add(cbp);
+				    				}
+				    				else {
+				    					synchronized(cbp) {
+				    						cbp.data = p.getDecodedData();
+				    						cbp.notify();
+				    					}
+				    					break;
+				    					
+				    				}
+				    			}
+				    		}
 				    	}
 			    	}
 			    	catch(SocketException e) {
@@ -208,5 +226,17 @@ public class TCPHander extends Thread {
 		catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	public static byte [] sendRequestGetData(String ip,String request) throws IOException, InterruptedException {
+		OutputStreamWriter osw = Core.pdh.getOutputStream(ip);
+		byte [] packet = Core.pdh.getTCPHander(ip).p.createPacket(ByteArrayTransforms.toByteArray(request), Packet.REPLY, 1, (byte)0);
+		byte id = Core.pdh.getTCPHander(ip).p.getCreatedID();
+		CallBackPromise cbp = new CallBackPromise(id);
+		Core.pdh.getReplyQueue(ip).add(cbp);
+		synchronized (cbp) {
+			osw.write(ByteArrayTransforms.toCharArray(packet));
+			cbp.wait();
+		}
+		return cbp.data;
 	}
 }

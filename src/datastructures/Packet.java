@@ -23,17 +23,18 @@ public class Packet {
 	 * @param data - content of packet
 	 * @param request - is it a request (0) or a reply(1)
 	 * @param TTL - time to leave from network.
+	 * @param refid - Reference id of the packet
 	 * @return packet
 	 */
 	public byte[] createPacket(byte[] data,byte request,int TTL,byte refid) {
 		byte base64Payload = 0;
 		byte breakConnection = 0;
 		byte flags = (byte) (request<<0 | base64Payload<<1 | breakConnection<<2);
-		byte[] message = new byte[20+data.length];
+		byte[] message = new byte[21+data.length];
 		//Core.logManager.log(this.getClass().getName(), "The original length is : "+(20+data.length) );
 		// Set size
 		for(int i=0;i<8;i++) {
-			message[i]=(byte) ((0xFF<<(i*8) & ((long)data.length+20))>>(i*8));
+			message[i]=(byte) ((0xFF<<(i*8) & ((long)data.length+21))>>(i*8));
 			//Core.logManager.log(this.getClass().getName(), "Byte at "+i+" is "+Byte.toUnsignedInt(message[i]) );
 		}
 		// Set flags
@@ -80,7 +81,7 @@ public class Packet {
 		}
 		this._size=size;
 		//Core.logManager.log(this.getClass().getName(), "Size is "+size);
-		byte[] data = new byte[size-20];
+		byte[] data = new byte[size-21];
 		this._data=data;
 		// Get flags
 		flags=message[8];

@@ -9,7 +9,30 @@ import core.Core;
 public class AutoConnector extends Thread{
 	LinkedList<String> disconnectedPeers;
 	public void peerListRefresh() {
-		LinkedList<String> currentDisconnectedPeers = Core.pdh.getDisconnectedPeers();
+		LinkedList<String> currentDisconnectedPeers=null;
+		int tries = 0;
+		while(true) {
+			try {
+				currentDisconnectedPeers = Core.pdh.getDisconnectedPeers();
+				break;
+			}
+			catch (NullPointerException e){
+				Core.logManager.log(getClass().getName(), "Unable to lockonto the peers try-"+tries);
+				tries+=1;
+				if(tries==10) {
+					Core.logManager.critical(getClass().getName(), "Tries over exiting loop anyway");
+					e.printStackTrace();
+					Thread.dumpStack();
+					break;
+				}
+			}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		for(int i=0;i<currentDisconnectedPeers.size();i++) {
 			String temp = currentDisconnectedPeers.get(i);
 			if(!disconnectedPeers.contains(temp)) {
@@ -33,7 +56,6 @@ public class AutoConnector extends Thread{
 		new TCPClient(Core.config.getBootStrapPeer());
 		while(true){
 			peerListRefresh();
-			Core.logManager.log(this.getClass().getName(),"Disconnected Peers:"+disconnectedPeers.toString()); 
 			String chosenPeer = peerFinder();
 			Core.logManager.log(this.getClass().getName(),"Disconnected Peers:"+disconnectedPeers.toString()); 
 			if(chosenPeer!=null) {

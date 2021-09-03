@@ -1,9 +1,9 @@
 package datastructures;
 
 public class CallBackPromise {
-	public int refid;
+	public byte refid;
 	public byte[] data;
-	public CallBackPromise(int refid) {
+	public CallBackPromise(byte refid) {
 		// TODO Auto-generated constructor stub
 		this.refid = refid;
 	}

@@ -8,6 +8,7 @@ import java.util.Queue;
 import java.util.Set;
 
 import connectivity.TCPHander;
+import core.Core;
 
 public class PeerDataHandler{
 	HashMap<String, ArrayList<Object>> data;
@@ -47,6 +48,7 @@ public class PeerDataHandler{
 	 */
 	public boolean addPeer(String peerIP,boolean inconnect, OutputStreamWriter outputStream, Queue<Object> replyQueue, TCPHander tcpHandler, boolean connected) {
 		if(!data.containsKey(peerIP)) {
+			Core.logManager.log(getClass().getName(), "Adding peer to list with IP:"+peerIP);
 			ArrayList<Object> al = new ArrayList<Object>();
 			int id = 0;
 			al.add(0, id);
@@ -59,6 +61,7 @@ public class PeerDataHandler{
 			return true;
 		}
 		else {
+			Core.logManager.log(getClass().getName(), "Adding peer failed, exists IP:"+peerIP);
 			return false;
 		}
 		//TODO:  Remove unused stuff from Peer Data Handler
@@ -255,6 +258,7 @@ public class PeerDataHandler{
 		LinkedList<String> disconnected_list = new LinkedList<String>();
 		for(int i=0;i<keys_list.size();i++) {
 			String current = keys_list.get(i);
+			Core.logManager.log(getClass().getName(), "Value of current:"+current+" keys_list.size():"+keys_list.size());
 			boolean connected = getConnected(current);
 			if(connected==false) {
 				disconnected_list.add(keys_list.get(i));

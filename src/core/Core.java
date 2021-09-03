@@ -14,9 +14,12 @@ public class Core {
 	public static PeerDataHandler pdh;
 	public static ConfigInit config;
 	public static ConnectionIDHander cIDHandle;
+	public static PeerUIDHander UIDHander;
     public static void main(String[] args) {
+    	UIDHander = new PeerUIDHander();
     	logManager = new LogManager();
     	logManager.log(Core.class.getName(), "Welcome to AnonFS version: "+Configuration.version+" core now alive!");
+    	logManager.log(Core.class.getName(), "UID:"+UIDHander.getUIDString());
     	cIDHandle = new ConnectionIDHander();
     	try {
 			config = new ConfigInit();

@@ -27,17 +27,19 @@ public class TCPHander extends Thread {
 		p = new Packet();
 		Queue<Object> q = new LinkedList<Object>();
 		// TODO: Do something when the conflict comes.. May be prefer newest connection
-		if(! Core.pdh.entryExists(clientSocket.getInetAddress().getHostAddress())) {
-			Core.pdh.addPeer(clientSocket.getInetAddress().getHostAddress(), server, new OutputStreamWriter(clientSocket.getOutputStream()), q, this, true);
-			Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" added to Peer DB");
-		}
-		else {
-			if(Core.pdh.getConnected(clientSocket.getInetAddress().getHostAddress())) {
-				Core.logManager.critical(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" already exists in Peer DB! (May be redundant connection)");
-				redudantConnection = true;
+		synchronized(Core.pdh) {
+			if(! Core.pdh.entryExists(clientSocket.getInetAddress().getHostAddress())) {
+				Core.pdh.addPeer(clientSocket.getInetAddress().getHostAddress(), server, new OutputStreamWriter(clientSocket.getOutputStream()), q, this, true);
+				Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" added to Peer DB");
 			}
 			else {
-				Core.pdh.setConnected(clientSocket.getInetAddress().getHostAddress(), true);
+				if(Core.pdh.getConnected(clientSocket.getInetAddress().getHostAddress())) {
+					Core.logManager.critical(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" already exists in Peer DB! and connected! (May be redundant connection)");
+					redudantConnection = true;
+				}
+				else {
+					Core.pdh.setConnected(clientSocket.getInetAddress().getHostAddress(), true);
+				}
 			}
 		}
 	}
@@ -128,13 +130,15 @@ public class TCPHander extends Thread {
 			    	int count=0;
 			    	byte [] packet = p.readInputStreamPacket(in);
 			    	if(packet==null) {
-			    		//End of stream reached and socket is dead, so packup
-			    		Core.logManager.log(this.getClass().getName(), "IP: " + clientSocket.getInetAddress().getHostAddress()  + " Client "+id+" disconnected!");
-			    		//Core.pdh.removePeer(clientSocket.getInetAddress().getHostAddress());
-			    		Core.pdh.setConnected(clientSocket.getInetAddress().getHostAddress(),false);
-			    		Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" removed from Peer DB");
-			    		clientSocket.close();
-			    		break;
+			    		synchronized(Core.pdh) {
+				    		//End of stream reached and socket is dead, so packup
+				    		Core.logManager.log(this.getClass().getName(), "IP: " + clientSocket.getInetAddress().getHostAddress()  + " Client "+id+" disconnected!");
+				    		//Core.pdh.removePeer(clientSocket.getInetAddress().getHostAddress());
+				    		Core.pdh.setConnected(clientSocket.getInetAddress().getHostAddress(),false);
+				    		Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" set connected to false");
+				    		clientSocket.close();
+				    		break;
+			    		}
 			    	}
 			    	String message = new String(p.getDecodedData());
 //			    	byte line [] = readLine(in);
@@ -166,6 +170,10 @@ public class TCPHander extends Thread {
 					    		out.flush();
 					    		//TODO Implement GetPeerList
 					    	}
+					    	else if(message.compareTo("GetUID")==0) {
+					    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray(Core.UIDHander.getUIDString()), Packet.REPLY, 1, p.getDecodedrefid())));
+					    		out.flush();
+					    	}
 					    	else if(message.startsWith("PushPiece")) {
 					    		out.write(ByteArrayTransforms.toCharArray(p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1, p.getDecodedrefid())));
 					    		out.flush();
@@ -195,7 +203,8 @@ public class TCPHander extends Thread {
 				    		// Check if there is a thing waiting reply, if yes, inject data
 				    		Queue<Object> queue = Core.pdh.getReplyQueue(clientSocket.getInetAddress().getAddress().toString());
 				    		if(queue.size()>0) {
-				    			for(int i=0;i<queue.size();i++) { // Parse like a deck of cards
+				    			int size = queue.size();
+				    			for(int i=0;i<size;i++) { // Parse like a deck of cards
 				    				CallBackPromise cbp = (CallBackPromise) queue.remove();
 				    				if(cbp.refid!=p.getDecodedrefid()) {
 				    					queue.add(cbp);

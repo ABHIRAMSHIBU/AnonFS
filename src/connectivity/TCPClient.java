@@ -168,7 +168,7 @@ public class TCPClient{
 					TCPHander tcph = new TCPHander(pingSocket, port, false);
 					tcph.start();
 			} catch (IOException e) {
-				System.out.println("TCPClient Error occured for "+ip);
+				Core.logManager.log(getClass().getName(), "TCPClient Error occured for "+ip);
 				status=false;
 			}
 	}

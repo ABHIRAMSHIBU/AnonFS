@@ -1,6 +1,7 @@
 package core;
 import java.io.IOException;
 
+import algorithm.FileTransforms;
 import configuration.ConfigInit;
 import configuration.Configuration;
 import connectivity.AutoConnector;
@@ -18,6 +19,7 @@ public class Core {
     public static void main(String[] args) {
     	UIDHander = new PeerUIDHander();
     	logManager = new LogManager();
+    	FileTransforms.FileToPices("/proc/cmdline",40);
     	logManager.log(Core.class.getName(), "Welcome to AnonFS version: "+Configuration.version+" core now alive!");
     	logManager.log(Core.class.getName(), "UID:"+UIDHander.getUIDString());
     	cIDHandle = new ConnectionIDHander();

@@ -40,6 +40,10 @@ public class AutoConnector extends Thread{
 			}
 		}
 	}
+	/** Find disconnected peer and return it
+	 * 
+	 * @return
+	 */
 	public String peerFinder() {
 		String peerFound=null;
 		if(disconnectedPeers.size()!=0) {
@@ -59,7 +63,12 @@ public class AutoConnector extends Thread{
 			String chosenPeer = peerFinder();
 			Core.logManager.log(this.getClass().getName(),"Disconnected Peers:"+disconnectedPeers.toString()); 
 			if(chosenPeer!=null) {
+				/* Bug fix
+				 * Remove chosen peer if already connected, otherwise will lead to indefinite loop
+				 */
 				if(Core.pdh.getConnected(chosenPeer)) {
+					disconnectedPeers.remove(chosenPeer);
+					Core.logManager.log(this.getClass().getName(), "Removed disconnected peer "+chosenPeer);
 					continue;
 				}
 				new TCPClient(chosenPeer);

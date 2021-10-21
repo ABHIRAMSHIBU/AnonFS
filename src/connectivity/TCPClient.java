@@ -16,6 +16,7 @@ import datastructures.Packet;
 public class TCPClient{
 	Socket socket;
 	String ip;
+	static byte currentid=0;
 	int port;
 	boolean failed=false;
 	public boolean status=false,run=false;
@@ -112,11 +113,12 @@ public class TCPClient{
 	 */
 	public void sendRequest(String data) throws IOException {
 		Packet p = new Packet();
+		currentid+=1;
 		byte data_array[] = new byte[data.length()];
 		for(int i = 0; i<data.length() ; i++) {
 			data_array[i] = (byte)data.charAt(i);
 		}
-		byte packet[]=p.createPacket(data_array, Packet.REQUEST, 1);
+		byte packet[]=p.createPacket(data_array, Packet.REQUEST, 1, currentid);
 		byte id = p.getCreatedID();
 		char packet_char[] = new char[packet.length];
 		for(int i = 0; i<packet.length;i++) {

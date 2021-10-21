@@ -10,6 +10,7 @@ import logging.LogManager;
 public class Core {
 	public static LogManager logManager;
 	public static void main(String[] args) {
+		System.out.println("Welcome to AnonFS protocol debugger!");
 		// TODO Auto-generated method stub
 		try {
 			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -31,6 +32,7 @@ public class Core {
 		}
 		catch(Exception e){
 			logManager.log(Core.class.getName(), e.toString());
+			e.printStackTrace();
 		}
 	}
 

@@ -128,8 +128,9 @@ public class TCPHander extends Thread {
 //				    out.flush();
 //			    }
 			    while(true) {
-			    	int count=0;
-			    	byte [] packet = p.readInputStreamPacket(in);
+			    	
+			    	// Blocked read so no need for Thread.sleep
+			    	HashMap<String, Object> packet = p.readInputStreamPacket(in);
 			    	if(packet==null) {
 			    		synchronized(Core.pdh) {
 				    		//End of stream reached and socket is dead, so packup
@@ -141,7 +142,7 @@ public class TCPHander extends Thread {
 				    		break;
 			    		}
 			    	}
-			    	String message = new String(p.getDecodedData());
+			    	String message = new String((byte []) packet.get("body"));
 //			    	byte line [] = readLine(in);
 //			    	if(line==null) {
 //			    		Core.logManager.log(this.getClass().getName(), "IP: " + clientSocket.getInetAddress().getHostAddress()  + " Client "+id+" disconnected!");
@@ -150,16 +151,24 @@ public class TCPHander extends Thread {
 //			    	String message = new String(line);
 			    	
 			    	//Enable the below line to log every message
-			    	Core.logManager.log(this.getClass().getName(), "Got String:"+message);
+			    	Core.logManager.log(this.getClass().getName(), "Got String:"+message+" refid:"+(byte)packet.get("refid"));
+			    	// TODO: Change message to binary type.. otherwise might need base64 encode.
 			    	try {
 			    		HashMap<String, Object> packetWrapper = null;
+			    		
+			    		// At this point we know the inbound packet is a request not a reply
 				    	if(p.getDecodedRequestFlag()==Packet.REQUEST) {
+				    		Core.logManager.log(this.getClass().getName(),"request mode");
+				    		
+				    		// Command Info
 					    	if(message.compareTo("info")==0) {
 					    		Core.logManager.log(this.getClass().getName(), "ClientID:"+id+" asked info");
-					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("AnonFS "+Configuration.version+"\n"), Packet.REPLY, 1, p.getDecodedrefid());
-					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("body")));
+					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("AnonFS "+Configuration.version+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
+					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
 					    		out.flush();
 					    	}
+					    	
+					    	// Command GetPeerList
 					    	else if(message.compareTo("GetPeerList")==0) {
 					    		String peerString="";
 					    		LinkedList<String> peerList = Core.pdh.getPeers();
@@ -169,65 +178,86 @@ public class TCPHander extends Thread {
 					    				peerString+="\n";
 					    			}
 					    		}
-					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray(peerString), Packet.REPLY, 1, p.getDecodedrefid());
-					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("body")));
+					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray(peerString), Packet.REPLY, 1, (byte) packet.get("id"));
+					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
 					    		out.flush();
 					    		//TODO Implement GetPeerList
 					    	}
+					    	
+					    	// Command GetUID
 					    	else if(message.compareTo("GetUID")==0) {
-					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray(Core.UIDHander.getUIDString()), Packet.REPLY, 1, p.getDecodedrefid());
-					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("body")));
+					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray(Core.UIDHander.getUIDString()), Packet.REPLY, 1, (byte) packet.get("id"));
+					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
 					    		out.flush();
 					    	}
+					    	
+					    	// Command PushPiece
 					    	else if(message.startsWith("PushPiece")) {
-					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1, p.getDecodedrefid());
-					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("body")));
+					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
+					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
 					    		out.flush();
 					    		// TODO Implement PushPiece
 					    	}
+					    	
+					    	// Command GetPiece
 					    	else if(message.startsWith("GetPiece")) {
-					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1, p.getDecodedrefid());
-					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("body")));
+					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
+					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
 					    		out.flush();
 					    		// TODO Implement GetPiece
 					    	}
+					    	
+					    	// Command FindPiece
 					    	else if(message.startsWith("FindPiece")) {
-					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1, p.getDecodedrefid());
-					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("body")));
+					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
+					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
 					    		out.flush();
 					    		// TODO Implement FindPiece
 					    	}
+					    	
+					    	// Command MyIP
 					    	else if(message.startsWith("MyIP")) {
-					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray(clientSocket.getInetAddress().getHostAddress()+"\n"), Packet.REPLY, 1, p.getDecodedrefid());
-					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("body")));
+					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray(clientSocket.getInetAddress().getHostAddress()+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
+					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
 					    		out.flush();
 					    	}
+					    	
+					    	// Command is not valid error condition
 					    	else {
-					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("Invalid command!"+"\n"), Packet.REPLY, 1, p.getDecodedrefid());
-					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("body")));
+					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("Invalid command!"+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
+					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
 					    		out.flush();
 					    	}
 				    	}
+				    	
+				    	// At this point we know that the inbound packet is a reply not a request.
 				    	else {
 				    		// Queue Packet in reply queue.
 				    		// Check if there is a thing waiting reply, if yes, inject data
-				    		Queue<Object> queue = Core.pdh.getReplyQueue(clientSocket.getInetAddress().getAddress().toString());
-				    		if(queue.size()>0) {
-				    			int size = queue.size();
-				    			for(int i=0;i<size;i++) { // Parse like a deck of cards
-				    				CallBackPromise cbp = (CallBackPromise) queue.remove();
-				    				if(cbp.refid!=p.getDecodedrefid()) {
-				    					queue.add(cbp);
-				    				}
-				    				else {
-				    					synchronized(cbp) {
-				    						cbp.data = p.getDecodedData();
-				    						cbp.notify();
-				    					}
-				    					break;
-				    					
-				    				}
-				    			}
+				    		Core.logManager.log(this.getClass().getName(),"reply mode");
+				    		synchronized (Core.pdh) {
+				    			Core.logManager.log(this.getClass().getName(),"got lock on pdh");
+				    			Core.logManager.log(this.getClass().getName(),""+clientSocket.getInetAddress().getHostAddress().toString());
+				    			Queue<Object> queue = Core.pdh.getReplyQueue(clientSocket.getInetAddress().getHostAddress().toString());	
+					    		if(queue.size()>0) {
+					    			int size = queue.size();
+					    			for(int i=0;i<size;i++) { // Parse like a deck of cards
+					    				CallBackPromise cbp = (CallBackPromise) queue.remove();
+					    				if(cbp.refid!=(byte) packet.get("refid")) {
+					    					queue.add(cbp);
+					    					Core.logManager.log(this.getClass().getName(), "Message: "+message+" refid: "+(byte)packet.get("refid")+" does not match call back promise ref id: "+cbp.refid);
+					    				}
+					    				else {
+					    					synchronized(cbp) {
+					    						cbp.data = p.getDecodedData();
+					    						Core.logManager.log(this.getClass().getName(), "Message: "+message+" refid: "+(byte)packet.get("refid")+" did match call back promise ref id: "+cbp.refid);
+					    						cbp.notify();
+					    						Core.logManager.log(this.getClass().getName(), "Notifying back");
+					    					}
+					    					break;
+					    				}
+					    			}
+					    		}
 				    		}
 				    	}
 			    	}
@@ -247,16 +277,18 @@ public class TCPHander extends Thread {
 		}
 	}
 	public static byte [] sendRequestGetData(String ip,String request) throws IOException, InterruptedException {
-		OutputStreamWriter osw = Core.pdh.getOutputStream(ip);
-		HashMap<String, Object> packetWrapper = Core.pdh.getTCPHander(ip).p.createPacket(ByteArrayTransforms.toByteArray(request), Packet.REPLY, 1, (byte)0);
-		byte [] packet = (byte[]) packetWrapper.get("packet");
-		byte id = (byte) packetWrapper.get("id");
-		CallBackPromise cbp = new CallBackPromise(id);
-		Core.pdh.getReplyQueue(ip).add(cbp);
-		synchronized (cbp) {
-			osw.write(ByteArrayTransforms.toCharArray(packet));
-			cbp.wait();
+		synchronized (Core.pdh) {
+			OutputStreamWriter osw = Core.pdh.getOutputStream(ip);
+			HashMap<String, Object> packetWrapper = Core.pdh.getTCPHander(ip).p.createPacket(ByteArrayTransforms.toByteArray(request), Packet.REPLY, 1, (byte)0);
+			byte [] packet = (byte[]) packetWrapper.get("packet");
+			byte id = (byte) packetWrapper.get("id");
+			CallBackPromise cbp = new CallBackPromise(id);
+			Core.pdh.getReplyQueue(ip).add(cbp);
+			synchronized (cbp) {
+				osw.write(ByteArrayTransforms.toCharArray(packet));
+				cbp.wait();
+			}
+			return cbp.data;
 		}
-		return cbp.data;
 	}
 }

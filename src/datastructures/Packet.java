@@ -49,7 +49,9 @@ public class Packet {
 		// Set id
 		message[9]=id;
 		message[10]=refid;
-		if(id==255) { //Increment ID rollover
+		// Bug fix set ID before being altered
+		packetWrapper.put("id", id);
+		if(id==120) { //Increment ID rollover
 			id=0;
 		}
 		else {
@@ -68,11 +70,10 @@ public class Packet {
 		for(int i=0;i<data.length;i++) {
 			message[i+21]=data[i];
 		}
-		packetWrapper.put("id", id);
 		packetWrapper.put("refid", refid);
 		packetWrapper.put("ttl", TTL);
 		packetWrapper.put("request", request);
-		packetWrapper.put("body", message);
+		packetWrapper.put("packet", message);
 		return packetWrapper;
 	}
 	/**decodePacket, decodes packet which is encoded by createPacket.
@@ -80,7 +81,8 @@ public class Packet {
 	 * @param message - packet
 	 * @return data -data in the packet
 	 */
-	public byte[] decodePacket(byte [] message) {
+	public HashMap<String, Object> decodePacket(byte [] message) {
+		HashMap<String, Object> packetWrapper = new HashMap<String, Object>();
 		byte flags;
 		int size=0;
 		int ttl=0;
@@ -123,7 +125,11 @@ public class Packet {
 			data[i]=message[i+21];
 		}
 		this._data=data;
-		return data;
+		packetWrapper.put("id", id);
+		packetWrapper.put("refid", refid);
+		packetWrapper.put("flags", flags);
+		packetWrapper.put("body", data);
+		return packetWrapper;
 	}
 	/**
 	 * Get Time To Leave from network
@@ -187,7 +193,7 @@ public class Packet {
 	 * @return raw packet data as binary
 	 * @throws IOException
 	 */
-	public byte [] readInputStreamPacket(InputStreamReader in) throws IOException {
+	public HashMap<String, Object> readInputStreamPacket(InputStreamReader in) throws IOException {
 		try {
 			// First 8 bytes are length so read it.
 			char sizearray[]=new char[8];
@@ -212,8 +218,8 @@ public class Packet {
 			for(int i=0;i<size;i++) {
 				packet_byte[i]=(byte)packet[i];
 			}
-			decodePacket((byte [])packet_byte);
-			return packet_byte;
+			HashMap<String, Object> packetWrapper = decodePacket((byte [])packet_byte);
+			return packetWrapper;
 		}
 		catch(IndexOutOfBoundsException e) {
 			Core.logManager.critical(this.getClass().getName(), "Got "+e.toString()+" treating as socket closed");

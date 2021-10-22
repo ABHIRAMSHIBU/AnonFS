@@ -249,12 +249,12 @@ public class TCPHander extends Thread {
 	public static byte [] sendRequestGetData(String ip,String request) throws IOException, InterruptedException {
 		OutputStreamWriter osw = Core.pdh.getOutputStream(ip);
 		HashMap<String, Object> packetWrapper = Core.pdh.getTCPHander(ip).p.createPacket(ByteArrayTransforms.toByteArray(request), Packet.REPLY, 1, (byte)0);
-		byte [] packetBody = (byte[]) packetWrapper.get("body");
+		byte [] packet = (byte[]) packetWrapper.get("packet");
 		byte id = (byte) packetWrapper.get("id");
 		CallBackPromise cbp = new CallBackPromise(id);
 		Core.pdh.getReplyQueue(ip).add(cbp);
 		synchronized (cbp) {
-			osw.write(ByteArrayTransforms.toCharArray(packetBody));
+			osw.write(ByteArrayTransforms.toCharArray(packet));
 			cbp.wait();
 		}
 		return cbp.data;

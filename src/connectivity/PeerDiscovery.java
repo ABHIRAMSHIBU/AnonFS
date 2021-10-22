@@ -25,13 +25,13 @@ public class PeerDiscovery extends Thread {
 				Queue<Object> qcallback = pdh.getReplyQueue(peer);
 				OutputStreamWriter osw = pdh.getOutputStream(peer);
 				HashMap<String, Object> packetWrapper = handler.p.createPacket(ByteArrayTransforms.toByteArray("GetPeerList"),"1".getBytes()[0],0,"0".getBytes()[0]);
-				byte packetBody[] = (byte[]) packetWrapper.get("body");
+				byte packet[] = (byte[]) packetWrapper.get("packet");
 				byte packetid = (byte) packetWrapper.get("id");
 				CallBackPromise cbp = new CallBackPromise(packetid);
 				synchronized (cbp) {
 					try {
 						qcallback.add(cbp);
-						osw.write(ByteArrayTransforms.toCharArray(packetBody));
+						osw.write(ByteArrayTransforms.toCharArray(packet));
 						Core.logManager.log(this.getClass().getName(), "Going to wait on Call Back Promise ID:"+handler.p.getCreatedID());
 						cbp.wait();
 						Core.logManager.log(this.getClass().getName(), "Wait finished on Call Back Promise");

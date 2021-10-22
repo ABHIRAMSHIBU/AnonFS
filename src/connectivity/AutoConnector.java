@@ -12,18 +12,20 @@ public class AutoConnector extends Thread{
 		LinkedList<String> currentDisconnectedPeers=null;
 		int tries = 0;
 		while(true) {
-			try {
-				currentDisconnectedPeers = Core.pdh.getDisconnectedPeers();
-				break;
-			}
-			catch (NullPointerException e){
-				Core.logManager.log(getClass().getName(), "Unable to lockonto the peers try-"+tries);
-				tries+=1;
-				if(tries==10) {
-					Core.logManager.critical(getClass().getName(), "Tries over exiting loop anyway");
-					e.printStackTrace();
-					Thread.dumpStack();
+			synchronized (Core.pdh) {
+				try {
+					currentDisconnectedPeers = Core.pdh.getDisconnectedPeers();
 					break;
+				}
+				catch (NullPointerException e){
+					Core.logManager.log(getClass().getName(), "Unable to lockonto the peers try-"+tries);
+					tries+=1;
+					if(tries==10) {
+						Core.logManager.critical(getClass().getName(), "Tries over exiting loop anyway");
+						e.printStackTrace();
+						Thread.dumpStack();
+						break;
+					}
 				}
 			}
 			try {

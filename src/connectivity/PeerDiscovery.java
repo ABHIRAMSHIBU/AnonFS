@@ -9,6 +9,7 @@ import java.util.Queue;
 import algorithm.ByteArrayTransforms;
 import core.Core;
 import datastructures.CallBackPromise;
+import datastructures.Packet;
 import datastructures.PeerDataHandler;
 import logging.LogManager;
 
@@ -16,22 +17,39 @@ public class PeerDiscovery extends Thread {
 	PeerDataHandler pdh = Core.pdh;
 	public void run() {
 		while(true) {
-			LinkedList<String> peerList = pdh.getConnectedPeers();
+			LinkedList<String> peerList = null;
+			synchronized (pdh) {
+				peerList = pdh.getConnectedPeers();
+			}
 			int peerCount = peerList.size();
 			for(int i=0;i<peerCount;i++) {
 				String peer = peerList.get(i);
 				Core.logManager.log(this.getClass().getName(), "Inside i="+i+" value = "+peer);
-				TCPHander handler = pdh.getTCPHander(peer);
-				Queue<Object> qcallback = pdh.getReplyQueue(peer);
-				OutputStreamWriter osw = pdh.getOutputStream(peer);
-				HashMap<String, Object> packetWrapper = handler.p.createPacket(ByteArrayTransforms.toByteArray("GetPeerList"),"1".getBytes()[0],0,"0".getBytes()[0]);
+				TCPHander handler;
+				Queue<Object> qcallback;
+				OutputStreamWriter osw;
+				synchronized (pdh) {
+					handler = pdh.getTCPHander(peer);
+					qcallback = pdh.getReplyQueue(peer);
+					osw = pdh.getOutputStream(peer);
+				}
+				HashMap<String, Object> packetWrapper = handler.p.createPacket(ByteArrayTransforms.toByteArray("GetPeerList"),Packet.REQUEST,0,(byte)0);
 				byte packet[] = (byte[]) packetWrapper.get("packet");
 				byte packetid = (byte) packetWrapper.get("id");
+				
+				
+				HashMap<String, Object> testpacket = handler.p.decodePacket(packet);
+				Core.logManager.log(this.getClass().getName(), "Refid:"+(byte)testpacket.get("refid")+" id:"+(byte)testpacket.get("id")+" idpacketWrap:"+packetid);
+				
+				
+				
+				
 				CallBackPromise cbp = new CallBackPromise(packetid);
 				synchronized (cbp) {
 					try {
 						qcallback.add(cbp);
 						osw.write(ByteArrayTransforms.toCharArray(packet));
+						osw.flush();
 						Core.logManager.log(this.getClass().getName(), "Going to wait on Call Back Promise ID:"+handler.p.getCreatedID());
 						cbp.wait();
 						Core.logManager.log(this.getClass().getName(), "Wait finished on Call Back Promise");
@@ -51,7 +69,6 @@ public class PeerDiscovery extends Thread {
 				}
 			}
 		}
-		
 	}
 	private CallBackPromise CallBackPromise(byte packetid) {
 		// TODO Auto-generated method stub

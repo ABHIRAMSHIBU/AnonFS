@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.HashMap;
 
 import algorithm.ByteArrayTransforms;
 import configuration.Configuration;
@@ -116,11 +117,12 @@ public class TCPClient{
 		for(int i = 0; i<data.length() ; i++) {
 			data_array[i] = (byte)data.charAt(i);
 		}
-		byte packet[]=p.createPacket(data_array, Packet.REQUEST, 1, (byte) 0);
-		byte id = p.getCreatedID();
-		char packet_char[] = new char[packet.length];
-		for(int i = 0; i<packet.length;i++) {
-			packet_char[i]=(char)packet[i];
+		HashMap<String, Object> packetWrapper=p.createPacket(data_array, Packet.REQUEST, 1, (byte) 0);
+		byte [] packetBody = (byte[]) packetWrapper.get("body");
+		byte id = (byte) packetWrapper.get("id");
+		char packet_char[] = new char[packetBody.length];
+		for(int i = 0; i<packetBody.length;i++) {
+			packet_char[i]=(char)packetBody[i];
 		}
 		OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream());
 		InputStreamReader in = new InputStreamReader(socket.getInputStream());

@@ -2,6 +2,7 @@ package connectivity;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -19,17 +20,21 @@ public class PeerDiscovery extends Thread {
 			int peerCount = peerList.size();
 			for(int i=0;i<peerCount;i++) {
 				String peer = peerList.get(i);
+				Core.logManager.log(this.getClass().getName(), "Inside i="+i+" value = "+peer);
 				TCPHander handler = pdh.getTCPHander(peer);
 				Queue<Object> qcallback = pdh.getReplyQueue(peer);
 				OutputStreamWriter osw = pdh.getOutputStream(peer);
-				byte packet[] = handler.p.createPacket(ByteArrayTransforms.toByteArray("GetPeerList"),"1".getBytes()[0],0,"0".getBytes()[0]);
-				byte packetid = handler.p.getCreatedID();
-				CallBackPromise cbp = CallBackPromise(packetid);
+				HashMap<String, Object> packetWrapper = handler.p.createPacket(ByteArrayTransforms.toByteArray("GetPeerList"),"1".getBytes()[0],0,"0".getBytes()[0]);
+				byte packetBody[] = (byte[]) packetWrapper.get("body");
+				byte packetid = (byte) packetWrapper.get("id");
+				CallBackPromise cbp = new CallBackPromise(packetid);
 				synchronized (cbp) {
 					try {
 						qcallback.add(cbp);
-						osw.write(ByteArrayTransforms.toCharArray(packet));
+						osw.write(ByteArrayTransforms.toCharArray(packetBody));
+						Core.logManager.log(this.getClass().getName(), "Going to wait on Call Back Promise ID:"+handler.p.getCreatedID());
 						cbp.wait();
+						Core.logManager.log(this.getClass().getName(), "Wait finished on Call Back Promise");
 						
 					} catch (IOException | InterruptedException e) {
 						// TODO Auto-generated catch block

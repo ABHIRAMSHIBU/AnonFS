@@ -228,13 +228,17 @@ public class PeerDataHandler{
 	 */
 	public LinkedList<String> getConnectedPeers(){
 		Set<String> keys = data.keySet();
-		LinkedList<String> keys_list = new LinkedList<String>(keys);
 		LinkedList<String> connected_list = new LinkedList<String>();
-		for(int i=0;i<keys_list.size();i++) {
-			String current = keys_list.get(i);
-			boolean connected = getConnected(current);
-			if(connected==true) {
-				connected_list.add(keys_list.get(i));
+		if(keys.size()>0) {
+			LinkedList<String> keys_list = new LinkedList<String>(keys);
+			for(int i=0;i<keys_list.size();i++) {
+				String current = keys_list.get(i);
+				Core.logManager.log(getClass().getName(), "ConnectedPeers:Value of current:"+current+" keys_list.size():"+keys_list.size());
+				boolean connected = getConnected(current);
+				if(connected==true) {
+					Core.logManager.log(getClass().getName(), "ConnectedPeers: "+current+" is connected");
+					connected_list.add(keys_list.get(i));
+				}
 			}
 		}
 		return connected_list;
@@ -258,7 +262,7 @@ public class PeerDataHandler{
 		LinkedList<String> disconnected_list = new LinkedList<String>();
 		for(int i=0;i<keys_list.size();i++) {
 			String current = keys_list.get(i);
-			Core.logManager.log(getClass().getName(), "Value of current:"+current+" keys_list.size():"+keys_list.size());
+			Core.logManager.log(getClass().getName(), "DisconnectedPeers: Value of current:"+current+" keys_list.size():"+keys_list.size());
 			boolean connected = getConnected(current);
 			if(connected==false) {
 				disconnected_list.add(keys_list.get(i));

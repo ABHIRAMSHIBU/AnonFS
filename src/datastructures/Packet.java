@@ -3,6 +3,7 @@ package datastructures;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.SocketException;
+import java.util.HashMap;
 
 import core.Core;
 
@@ -24,9 +25,15 @@ public class Packet {
 	 * @param request - is it a request (0) or a reply(1)
 	 * @param TTL - time to leave from network.
 	 * @param refid - Reference id of the packet
-	 * @return packet
+	 * @return HashMap<String, Object> Valid Entries
+	 *  (byte)"id", 
+	 *  (byte)"refid", 
+	 *  (int)"ttl", 
+	 *  (byte)"request", 
+	 *  (byte[])"body"
 	 */
-	public byte[] createPacket(byte[] data,byte request,int TTL,byte refid) {
+	public HashMap<String, Object> createPacket(byte[] data,byte request,int TTL,byte refid) {
+		HashMap<String, Object> packetWrapper = new HashMap<String, Object>();
 		byte base64Payload = 0;
 		byte breakConnection = 0;
 		byte flags = (byte) (request<<0 | base64Payload<<1 | breakConnection<<2);
@@ -61,7 +68,12 @@ public class Packet {
 		for(int i=0;i<data.length;i++) {
 			message[i+21]=data[i];
 		}
-		return message;
+		packetWrapper.put("id", id);
+		packetWrapper.put("refid", refid);
+		packetWrapper.put("ttl", TTL);
+		packetWrapper.put("request", request);
+		packetWrapper.put("body", message);
+		return packetWrapper;
 	}
 	/**decodePacket, decodes packet which is encoded by createPacket.
 	 * 
@@ -189,11 +201,13 @@ public class Packet {
 				//Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(b));
 			}
 			//Core.logManager.log(this.getClass().getName(), "Got size "+size);
+			//Read Packet Size.
 			char packet[]=new char[size];
 			in.read(packet,8,size-8);
 			for(int i=0;i<8;i++) {
 				packet[i]=sizearray[i];
 			}
+			//Read the rest of the packet as we know the size.
 			byte packet_byte[]=new byte[size];
 			for(int i=0;i<size;i++) {
 				packet_byte[i]=(byte)packet[i];

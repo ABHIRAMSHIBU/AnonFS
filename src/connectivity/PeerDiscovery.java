@@ -60,6 +60,17 @@ public class PeerDiscovery extends Thread {
 					}
 				}
 				byte recievedData[] = cbp.data;
+				String ipList[] = (new String(cbp.data)).split("\n");
+				LinkedList<String> peers =  Core.pdh.getPeers();
+				for(int k=0;k<ipList.length;k++) {
+					if(peers.indexOf(ipList[k])==-1) {
+						new TCPClient(ipList[k]);
+						Core.logManager.log(this.getClass().getName(), "Connecting "+ipList[k]);
+					}
+					else {
+						Core.logManager.log(this.getClass().getName(), "Already exists "+ipList[k]);
+					}
+				}
 				Core.logManager.log(this.getClass().getName(), new String(ByteArrayTransforms.toCharArray(recievedData)));
 				try {
 					Thread.sleep(1000);

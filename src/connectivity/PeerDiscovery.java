@@ -1,6 +1,7 @@
 package connectivity;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -28,23 +29,71 @@ public class PeerDiscovery extends Thread {
 				TCPHander handler;
 				Queue<Object> qcallback;
 				OutputStreamWriter osw;
+				int selfHost;
+				
 				synchronized (pdh) {
 					handler = pdh.getTCPHander(peer);
 					qcallback = pdh.getReplyQueue(peer);
 					osw = pdh.getOutputStream(peer);
+					selfHost = pdh.getSelfHost(peer);
 				}
 				HashMap<String, Object> packetWrapper = handler.p.createPacket(ByteArrayTransforms.toByteArray("GetPeerList"),Packet.REQUEST,0,(byte)0);
 				byte packet[] = (byte[]) packetWrapper.get("packet");
 				byte packetid = (byte) packetWrapper.get("id");
 				
-				
-				HashMap<String, Object> testpacket = handler.p.decodePacket(packet);
-				Core.logManager.log(this.getClass().getName(), "Refid:"+(byte)testpacket.get("refid")+" id:"+(byte)testpacket.get("id")+" idpacketWrap:"+packetid);
-				
-				
-				
-				
+				// We dont know if its a self loop.
 				CallBackPromise cbp = new CallBackPromise(packetid);
+				if(selfHost == -1) {
+					try {
+						HashMap<String,Object> packetWrapper1 = handler.p.createPacket(ByteArrayTransforms.toByteArray("GetUID"),Packet.REQUEST,0,(byte)0);
+						byte packet1[] = (byte[]) packetWrapper1.get("packet");
+						byte packetid1 = (byte) packetWrapper1.get("id");
+						CallBackPromise cbp1 = new CallBackPromise(packetid1);
+						synchronized (cbp1) {
+							qcallback.add(cbp1);
+							if(handler.clientSocket.isClosed()) {
+								Core.logManager.log(this.getClass().getName(), "Socket already closed for peer "+peer);
+							}
+							else {
+								Core.logManager.log(this.getClass().getName(), "Socket is open proceeding for peer "+peer);
+								osw.write(ByteArrayTransforms.toCharArray(packet1));
+								osw.flush();
+								cbp1.wait();
+							}
+							
+						}
+
+						byte recievedData1[] = cbp1.data;
+						if(recievedData1!=null) {
+							if(Core.UIDHander.getUIDString().equals(new String(recievedData1))) {
+								// Self loop
+								Core.logManager.log(this.getClass().getName(), "Loop detected "+peer);
+								osw.close();
+								handler.clientSocket.close();
+								selfHost = 1;
+							}
+							else {
+								Core.logManager.log(this.getClass().getName(), "No Loop detected "+peer);
+								selfHost = 0;
+							}
+						}
+						try {
+							pdh.setSelfHost(peer, selfHost);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+					}
+					catch (IOException | InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				if(selfHost == 1 || selfHost == -1) {
+					continue;
+				}
+				
 				synchronized (cbp) {
 					try {
 						qcallback.add(cbp);

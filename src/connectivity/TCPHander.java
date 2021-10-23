@@ -28,6 +28,28 @@ public class TCPHander extends Thread {
 		p = new Packet();
 		Queue<Object> q = new LinkedList<Object>();
 		// TODO: Do something when the conflict comes.. May be prefer newest connection
+		
+		
+//		// Self loop handler code.
+//		OutputStreamWriter osw = new OutputStreamWriter(clientSocket.getOutputStream());
+//		InputStreamReader isw = new InputStreamReader(clientSocket.getInputStream());
+//		HashMap<String,Object> packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("GetPeerList"),Packet.REQUEST,0,(byte)0);
+//		osw.write(ByteArrayTransforms.toCharArray((byte[])packetWrapper.get("packet")));
+//		osw.flush();
+//		packetWrapper = p.readInputStreamPacket(isw);
+//		String data = new String((byte[]) packetWrapper.get("body"));
+//		Core.logManager.critical(this.getClass().getName(), "LOOPING DEBUG: "+data+"\t"+Core.UIDHander.getUIDString());
+//		if(Core.UIDHander.getUIDString().equals(data)) {
+//			// Self loop
+//			Core.logManager.log(this.getClass().getName(), "Loop detected "+clientSocket.getInetAddress().getHostAddress());
+//			osw.close();
+//			isw.close();
+//			clientSocket.close();
+//			return;
+//		}
+//		// End broken self loop handler
+		
+		
 		synchronized(Core.pdh) {
 			if(! Core.pdh.entryExists(clientSocket.getInetAddress().getHostAddress())) {
 				Core.pdh.addPeer(clientSocket.getInetAddress().getHostAddress(), server, new OutputStreamWriter(clientSocket.getOutputStream()), q, this, true);

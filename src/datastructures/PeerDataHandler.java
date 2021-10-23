@@ -51,12 +51,14 @@ public class PeerDataHandler{
 			Core.logManager.log(getClass().getName(), "Adding peer to list with IP:"+peerIP);
 			ArrayList<Object> al = new ArrayList<Object>();
 			int id = 0;
+			int selfhost = -1;
 			al.add(0, id);
 			al.add(1, inconnect);
 			al.add(2, outputStream);
 			al.add(3, replyQueue);
 			al.add(4, tcpHandler);
 			al.add(5, connected);
+			al.add(6, selfhost);
 			data.put(peerIP, al);
 			return true;
 		}
@@ -146,6 +148,17 @@ public class PeerDataHandler{
 	}
 	
 	/**
+	 * Returns if the host is a selfloop or not. Selfloop applies to hosts with multiple IP address.
+	 * @param peerIP
+	 * @return Integer with value -1,0,1 -> Not Sure, Not Loop, Is Loop
+	 */
+	public int getSelfHost(String peerIP) {
+		/** Sets reply Queue of a peer given a valid peer, if not valid no idea about behavior **/
+		ArrayList<Object> al = data.get(peerIP);
+		return (int) al.get(6);
+	}
+	
+	/**
 	 * Sets id which should be of next packet given a valid peer, if not valid no idea about behavior
 	 * @param peerIP
 	 * @param id
@@ -195,6 +208,23 @@ public class PeerDataHandler{
 		/** Sets reply Queue of a peer given a valid peer, if not valid no idea about behavior **/
 		ArrayList<Object> al = data.get(peerIP);
 		al.set(5, connected);
+	}
+	
+	/**
+	 * Sets if a ip address is a loop or not.
+	 * @param peerIP - IP address of the peer to manipulate
+	 * @param SelfHost - -1,0,1 -> Not sure, not loop, is loop
+	 * @throws Exception 
+	 */
+	public void setSelfHost(String peerIP,int SelfHost) throws Exception {
+		/** Sets reply Queue of a peer given a valid peer, if not valid no idea about behavior **/
+		ArrayList<Object> al = data.get(peerIP);
+		if(SelfHost>=-1 && SelfHost<=1) {
+			al.set(6, SelfHost);
+		}
+		else {
+			throw new Exception("Invalid Argument Value "+SelfHost+" !");
+		}
 	}
 	
 	/**

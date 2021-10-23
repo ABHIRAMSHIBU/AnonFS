@@ -73,7 +73,20 @@ public class AutoConnector extends Thread{
 					Core.logManager.log(this.getClass().getName(), "Removed disconnected peer "+chosenPeer);
 					continue;
 				}
-				new TCPClient(chosenPeer);
+				synchronized (Core.pdh) {
+					int selfHost = Core.pdh.getSelfHost(chosenPeer);
+					if(selfHost == -1 || selfHost == 1) {
+						// Its either a loop or not determined so dont connect for now.
+						if(selfHost == -1)
+							Core.logManager.log(this.getClass().getName(),"Peer "+chosenPeer+" is not confirmed"); 
+						else
+							Core.logManager.log(this.getClass().getName(),"Peer "+chosenPeer+" self loop"); 
+					}
+					else {
+						new TCPClient(chosenPeer);
+						Core.logManager.log(this.getClass().getName(),"Peer "+chosenPeer+" TCPClient initiated");
+					}
+				}
 			}
 			try {
 				Thread.sleep(30000);

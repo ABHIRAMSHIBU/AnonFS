@@ -1,8 +1,8 @@
 package connectivity;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -12,7 +12,6 @@ import core.Core;
 import datastructures.CallBackPromise;
 import datastructures.Packet;
 import datastructures.PeerDataHandler;
-import logging.LogManager;
 
 public class PeerDiscovery extends Thread {
 	PeerDataHandler pdh = Core.pdh;
@@ -91,6 +90,12 @@ public class PeerDiscovery extends Thread {
 					}
 				}
 				if(selfHost == 1 || selfHost == -1) {
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					continue;
 				}
 				
@@ -103,35 +108,38 @@ public class PeerDiscovery extends Thread {
 						cbp.wait();
 						Core.logManager.log(this.getClass().getName(), "Wait finished on Call Back Promise");
 						
-					} catch (IOException | InterruptedException e) {
+					} catch (SocketException e) {
+						synchronized (pdh) {
+							pdh.setConnected(peer, false);
+						}
+					}
+					catch (IOException | InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
 				byte recievedData[] = cbp.data;
-				String ipList[] = (new String(cbp.data)).split("\n");
-				LinkedList<String> peers =  Core.pdh.getPeers();
-				for(int k=0;k<ipList.length;k++) {
-					if(peers.indexOf(ipList[k])==-1) {
-						new TCPClient(ipList[k]);
-						Core.logManager.log(this.getClass().getName(), "Connecting "+ipList[k]);
+				if(recievedData!=null) {
+					String ipList[] = (new String(recievedData)).split("\n");
+					LinkedList<String> peers =  Core.pdh.getPeers();
+					for(int k=0;k<ipList.length;k++) {
+						if(peers.indexOf(ipList[k])==-1) {
+							new TCPClient(ipList[k]);
+							Core.logManager.log(this.getClass().getName(), "Connecting "+ipList[k]);
+						}
+						else {
+							Core.logManager.log(this.getClass().getName(), "Already exists "+ipList[k]);
+						}
 					}
-					else {
-						Core.logManager.log(this.getClass().getName(), "Already exists "+ipList[k]);
-					}
-				}
-				Core.logManager.log(this.getClass().getName(), new String(ByteArrayTransforms.toCharArray(recievedData)));
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Core.logManager.log(this.getClass().getName(), new String(ByteArrayTransforms.toCharArray(recievedData)));
 				}
 			}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-	}
-	private CallBackPromise CallBackPromise(byte packetid) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

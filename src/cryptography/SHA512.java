@@ -7,7 +7,7 @@ public class SHA512 {
 	public static byte[] digest(byte [] in) throws NoSuchAlgorithmException {
 		MessageDigest md = MessageDigest.getInstance("SHA-512");
 		byte[] messageDigest = md.digest(in);
-		return in;
+		return messageDigest;
 	}
 	public static boolean verify(byte [] in, byte [] checksum) throws NoSuchAlgorithmException {
 		MessageDigest md = MessageDigest.getInstance("SHA-512");

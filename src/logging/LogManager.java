@@ -6,6 +6,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import configuration.ConfigInit;
+import core.Core;
+
 public class LogManager {
 	private static int count=0;
 	static FileHandler fh;
@@ -52,6 +55,11 @@ public class LogManager {
 		}
 		System.setProperty("java.util.logging.SimpleFormatter.format",
 	              "[%1$tF %1$tT] [%4$-7s] %5$s %n");
+	}
+	public void log(String class_name,String message, int level) {
+		if(Integer.parseInt(Core.config.getIni().fetch("logger", "LOG_LEVEL")) < level) {
+			log.log(Level.INFO,"ID:"+count+" Class:"+class_name+" "+message);
+		}
 	}
 	public void log(String class_name,String message) {
 		log.log(Level.INFO,"ID:"+count+" Class:"+class_name+" "+message);

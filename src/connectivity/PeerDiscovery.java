@@ -24,7 +24,7 @@ public class PeerDiscovery extends Thread {
 			int peerCount = peerList.size();
 			for(int i=0;i<peerCount;i++) {
 				String peer = peerList.get(i);
-				Core.logManager.log(this.getClass().getName(), "Inside i="+i+" value = "+peer);
+				Core.logManager.log(this.getClass().getName(), "Inside i="+i+" value = "+peer,4);
 				TCPHander handler;
 				Queue<Object> qcallback;
 				OutputStreamWriter osw;
@@ -51,10 +51,10 @@ public class PeerDiscovery extends Thread {
 						synchronized (cbp1) {
 							qcallback.add(cbp1);
 							if(handler.clientSocket.isClosed()) {
-								Core.logManager.log(this.getClass().getName(), "Socket already closed for peer "+peer);
+								Core.logManager.log(this.getClass().getName(), "Socket already closed for peer "+peer,4);
 							}
 							else {
-								Core.logManager.log(this.getClass().getName(), "Socket is open proceeding for peer "+peer);
+								Core.logManager.log(this.getClass().getName(), "Socket is open proceeding for peer "+peer,4);
 								osw.write(ByteArrayTransforms.toCharArray(packet1));
 								osw.flush();
 								cbp1.wait();
@@ -66,13 +66,13 @@ public class PeerDiscovery extends Thread {
 						if(recievedData1!=null) {
 							if(Core.UIDHander.getUIDString().equals(new String(recievedData1))) {
 								// Self loop
-								Core.logManager.log(this.getClass().getName(), "Loop detected "+peer);
+								Core.logManager.log(this.getClass().getName(), "Loop detected "+peer,4);
 								osw.close();
 								handler.clientSocket.close();
 								selfHost = 1;
 							}
 							else {
-								Core.logManager.log(this.getClass().getName(), "No Loop detected "+peer);
+								Core.logManager.log(this.getClass().getName(), "No Loop detected "+peer,4);
 								selfHost = 0;
 							}
 						}
@@ -104,9 +104,9 @@ public class PeerDiscovery extends Thread {
 						qcallback.add(cbp);
 						osw.write(ByteArrayTransforms.toCharArray(packet));
 						osw.flush();
-						Core.logManager.log(this.getClass().getName(), "Going to wait on Call Back Promise ID:"+handler.p.getCreatedID());
+						Core.logManager.log(this.getClass().getName(), "Going to wait on Call Back Promise ID:"+handler.p.getCreatedID(),4);
 						cbp.wait();
-						Core.logManager.log(this.getClass().getName(), "Wait finished on Call Back Promise");
+						Core.logManager.log(this.getClass().getName(), "Wait finished on Call Back Promise",4);
 						
 					} catch (SocketException e) {
 						synchronized (pdh) {
@@ -125,13 +125,13 @@ public class PeerDiscovery extends Thread {
 					for(int k=0;k<ipList.length;k++) {
 						if(peers.indexOf(ipList[k])==-1) {
 							new TCPClient(ipList[k]);
-							Core.logManager.log(this.getClass().getName(), "Connecting "+ipList[k]);
+							Core.logManager.log(this.getClass().getName(), "Connecting "+ipList[k],4);
 						}
 						else {
-							Core.logManager.log(this.getClass().getName(), "Already exists "+ipList[k]);
+							Core.logManager.log(this.getClass().getName(), "Already exists "+ipList[k],4);
 						}
 					}
-					Core.logManager.log(this.getClass().getName(), new String(ByteArrayTransforms.toCharArray(recievedData)));
+					Core.logManager.log(this.getClass().getName(), new String(ByteArrayTransforms.toCharArray(recievedData)),4);
 				}
 			}
 			try {

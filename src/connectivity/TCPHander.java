@@ -30,30 +30,10 @@ public class TCPHander extends Thread {
 		// TODO: Do something when the conflict comes.. May be prefer newest connection
 		
 		
-//		// Self loop handler code.
-//		OutputStreamWriter osw = new OutputStreamWriter(clientSocket.getOutputStream());
-//		InputStreamReader isw = new InputStreamReader(clientSocket.getInputStream());
-//		HashMap<String,Object> packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("GetPeerList"),Packet.REQUEST,0,(byte)0);
-//		osw.write(ByteArrayTransforms.toCharArray((byte[])packetWrapper.get("packet")));
-//		osw.flush();
-//		packetWrapper = p.readInputStreamPacket(isw);
-//		String data = new String((byte[]) packetWrapper.get("body"));
-//		Core.logManager.critical(this.getClass().getName(), "LOOPING DEBUG: "+data+"\t"+Core.UIDHander.getUIDString());
-//		if(Core.UIDHander.getUIDString().equals(data)) {
-//			// Self loop
-//			Core.logManager.log(this.getClass().getName(), "Loop detected "+clientSocket.getInetAddress().getHostAddress());
-//			osw.close();
-//			isw.close();
-//			clientSocket.close();
-//			return;
-//		}
-//		// End broken self loop handler
-		
-		
 		synchronized(Core.pdh) {
 			if(! Core.pdh.entryExists(clientSocket.getInetAddress().getHostAddress())) {
 				Core.pdh.addPeer(clientSocket.getInetAddress().getHostAddress(), server, new OutputStreamWriter(clientSocket.getOutputStream()), q, this, true);
-				Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" added to Peer DB");
+				Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" added to Peer DB",3);
 			}
 			else {
 				if(Core.pdh.getConnected(clientSocket.getInetAddress().getHostAddress())) {
@@ -156,10 +136,10 @@ public class TCPHander extends Thread {
 			    	if(packet==null) {
 			    		synchronized(Core.pdh) {
 				    		//End of stream reached and socket is dead, so packup
-				    		Core.logManager.log(this.getClass().getName(), "IP: " + clientSocket.getInetAddress().getHostAddress()  + " Client "+id+" disconnected!");
+				    		Core.logManager.log(this.getClass().getName(), "IP: " + clientSocket.getInetAddress().getHostAddress()  + " Client "+id+" disconnected!",3);
 				    		//Core.pdh.removePeer(clientSocket.getInetAddress().getHostAddress());
 				    		Core.pdh.setConnected(clientSocket.getInetAddress().getHostAddress(),false);
-				    		Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" set connected to false");
+				    		Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" set connected to false",4);
 				    		clientSocket.close();
 				    		break;
 			    		}
@@ -173,7 +153,7 @@ public class TCPHander extends Thread {
 //			    	String message = new String(line);
 			    	
 			    	//Enable the below line to log every message
-			    	Core.logManager.log(this.getClass().getName(), "Got String:"+message+" refid:"+(byte)packet.get("refid"));
+			    	Core.logManager.log(this.getClass().getName(), "Got String:"+message+" refid:"+(byte)packet.get("refid"),4);
 			    	// TODO: Change message to binary type.. otherwise might need base64 encode.
 			    	try {
 			    		HashMap<String, Object> packetWrapper = null;
@@ -184,7 +164,7 @@ public class TCPHander extends Thread {
 				    		
 				    		// Command Info
 					    	if(message.compareTo("info")==0) {
-					    		Core.logManager.log(this.getClass().getName(), "ClientID:"+id+" asked info");
+					    		Core.logManager.log(this.getClass().getName(), "ClientID:"+id+" asked info",4);
 					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("AnonFS "+Configuration.version+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
 					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
 					    		out.flush();
@@ -256,10 +236,10 @@ public class TCPHander extends Thread {
 				    	else {
 				    		// Queue Packet in reply queue.
 				    		// Check if there is a thing waiting reply, if yes, inject data
-				    		Core.logManager.log(this.getClass().getName(),"reply mode");
+				    		Core.logManager.log(this.getClass().getName(),"reply mode",4);
 				    		synchronized (Core.pdh) {
-				    			Core.logManager.log(this.getClass().getName(),"got lock on pdh");
-				    			Core.logManager.log(this.getClass().getName(),""+clientSocket.getInetAddress().getHostAddress().toString());
+				    			Core.logManager.log(this.getClass().getName(),"got lock on pdh",4);
+				    			Core.logManager.log(this.getClass().getName(),""+clientSocket.getInetAddress().getHostAddress().toString(),4);
 				    			Queue<Object> queue = Core.pdh.getReplyQueue(clientSocket.getInetAddress().getHostAddress().toString());	
 					    		if(queue.size()>0) {
 					    			int size = queue.size();
@@ -267,14 +247,14 @@ public class TCPHander extends Thread {
 					    				CallBackPromise cbp = (CallBackPromise) queue.remove();
 					    				if(cbp.refid!=(byte) packet.get("refid")) {
 					    					queue.add(cbp);
-					    					Core.logManager.log(this.getClass().getName(), "Message: "+message+" refid: "+(byte)packet.get("refid")+" does not match call back promise ref id: "+cbp.refid);
+					    					Core.logManager.log(this.getClass().getName(), "Message: "+message+" refid: "+(byte)packet.get("refid")+" does not match call back promise ref id: "+cbp.refid,4);
 					    				}
 					    				else {
 					    					synchronized(cbp) {
 					    						cbp.data = p.getDecodedData();
-					    						Core.logManager.log(this.getClass().getName(), "Message: "+message+" refid: "+(byte)packet.get("refid")+" did match call back promise ref id: "+cbp.refid);
+					    						Core.logManager.log(this.getClass().getName(), "Message: "+message+" refid: "+(byte)packet.get("refid")+" did match call back promise ref id: "+cbp.refid,4);
 					    						cbp.notify();
-					    						Core.logManager.log(this.getClass().getName(), "Notifying back");
+					    						Core.logManager.log(this.getClass().getName(), "Notifying back",4);
 					    					}
 					    					break;
 					    				}
@@ -285,9 +265,9 @@ public class TCPHander extends Thread {
 			    	}
 			    	catch(SocketException e) {
 			    		//End of stream reached and socket is dead, so packup
-			    		Core.logManager.log(this.getClass().getName(), "IP: " + clientSocket.getInetAddress().getHostAddress()  + " Client "+id+" disconnected!");
+			    		Core.logManager.log(this.getClass().getName(), "IP: " + clientSocket.getInetAddress().getHostAddress()  + " Client "+id+" disconnected!",4);
 			    		Core.pdh.setConnected(clientSocket.getInetAddress().getHostAddress(),false);
-			    		Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" removed from Peer DB");
+			    		Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" removed from Peer DB",4);
 			    		clientSocket.close();
 			    		break;
 			    	}

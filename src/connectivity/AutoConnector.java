@@ -18,7 +18,7 @@ public class AutoConnector extends Thread{
 					break;
 				}
 				catch (NullPointerException e){
-					Core.logManager.log(getClass().getName(), "Unable to lockonto the peers try-"+tries);
+					Core.logManager.log(getClass().getName(), "Unable to lockonto the peers try-"+tries,4);
 					tries+=1;
 					if(tries==10) {
 						Core.logManager.critical(getClass().getName(), "Tries over exiting loop anyway");
@@ -63,14 +63,14 @@ public class AutoConnector extends Thread{
 		while(true){
 			peerListRefresh();
 			String chosenPeer = peerFinder();
-			Core.logManager.log(this.getClass().getName(),"Disconnected Peers:"+disconnectedPeers.toString()); 
+			Core.logManager.log(this.getClass().getName(),"Disconnected Peers:"+disconnectedPeers.toString(),4); 
 			if(chosenPeer!=null) {
 				/* Bug fix
 				 * Remove chosen peer if already connected, otherwise will lead to indefinite loop
 				 */
 				if(Core.pdh.getConnected(chosenPeer)) {
 					disconnectedPeers.remove(chosenPeer);
-					Core.logManager.log(this.getClass().getName(), "Removed disconnected peer "+chosenPeer);
+					Core.logManager.log(this.getClass().getName(), "Removed disconnected peer "+chosenPeer,4);
 					continue;
 				}
 				synchronized (Core.pdh) {
@@ -78,13 +78,13 @@ public class AutoConnector extends Thread{
 					if(selfHost == -1 || selfHost == 1) {
 						// Its either a loop or not determined so dont connect for now.
 						if(selfHost == -1)
-							Core.logManager.log(this.getClass().getName(),"Peer "+chosenPeer+" is not confirmed"); 
+							Core.logManager.log(this.getClass().getName(),"Peer "+chosenPeer+" is not confirmed",4); 
 						else
-							Core.logManager.log(this.getClass().getName(),"Peer "+chosenPeer+" self loop"); 
+							Core.logManager.log(this.getClass().getName(),"Peer "+chosenPeer+" self loop",4); 
 					}
 					else {
 						new TCPClient(chosenPeer);
-						Core.logManager.log(this.getClass().getName(),"Peer "+chosenPeer+" TCPClient initiated");
+						Core.logManager.log(this.getClass().getName(),"Peer "+chosenPeer+" TCPClient initiated",4);
 					}
 				}
 			}

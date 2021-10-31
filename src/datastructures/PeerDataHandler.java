@@ -48,7 +48,7 @@ public class PeerDataHandler{
 	 */
 	public boolean addPeer(String peerIP,boolean inconnect, OutputStreamWriter outputStream, Queue<Object> replyQueue, TCPHander tcpHandler, boolean connected) {
 		if(!data.containsKey(peerIP)) {
-			Core.logManager.log(getClass().getName(), "Adding peer to list with IP:"+peerIP);
+			Core.logManager.log(getClass().getName(), "Adding peer to list with IP:"+peerIP,4);
 			ArrayList<Object> al = new ArrayList<Object>();
 			int id = 0;
 			int selfhost = -1;
@@ -63,7 +63,7 @@ public class PeerDataHandler{
 			return true;
 		}
 		else {
-			Core.logManager.log(getClass().getName(), "Adding peer failed, exists IP:"+peerIP);
+			Core.logManager.log(getClass().getName(), "Adding peer failed, exists IP:"+peerIP,4);
 			return false;
 		}
 		//TODO:  Remove unused stuff from Peer Data Handler
@@ -263,10 +263,10 @@ public class PeerDataHandler{
 			LinkedList<String> keys_list = new LinkedList<String>(keys);
 			for(int i=0;i<keys_list.size();i++) {
 				String current = keys_list.get(i);
-				Core.logManager.log(getClass().getName(), "ConnectedPeers:Value of current:"+current+" keys_list.size():"+keys_list.size());
+				Core.logManager.log(getClass().getName(), "ConnectedPeers:Value of current:"+current+" keys_list.size():"+keys_list.size(),4);
 				boolean connected = getConnected(current);
 				if(connected==true) {
-					Core.logManager.log(getClass().getName(), "ConnectedPeers: "+current+" is connected");
+					Core.logManager.log(getClass().getName(), "ConnectedPeers: "+current+" is connected",4);
 					connected_list.add(keys_list.get(i));
 				}
 			}
@@ -292,7 +292,7 @@ public class PeerDataHandler{
 		LinkedList<String> disconnected_list = new LinkedList<String>();
 		for(int i=0;i<keys_list.size();i++) {
 			String current = keys_list.get(i);
-			Core.logManager.log(getClass().getName(), "DisconnectedPeers: Value of current:"+current+" keys_list.size():"+keys_list.size());
+			Core.logManager.log(getClass().getName(), "DisconnectedPeers: Value of current:"+current+" keys_list.size():"+keys_list.size(),4);
 			boolean connected = getConnected(current);
 			if(connected==false) {
 				disconnected_list.add(keys_list.get(i));

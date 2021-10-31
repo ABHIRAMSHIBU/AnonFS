@@ -226,7 +226,7 @@ public class Packet {
 			return null;
 		}
 		catch(SocketException e) {
-			Core.logManager.log(this.getClass().getName(), "Got "+e.toString()+" treating as socket closed");
+			Core.logManager.log(this.getClass().getName(), "Got "+e.toString()+" treating as socket closed",4);
 			return null;
 		}
 	}

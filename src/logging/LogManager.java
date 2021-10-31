@@ -57,7 +57,7 @@ public class LogManager {
 	              "[%1$tF %1$tT] [%4$-7s] %5$s %n");
 	}
 	public void log(String class_name,String message, int level) {
-		if(Integer.parseInt(Core.config.getIni().fetch("logger", "LOG_LEVEL")) < level) {
+		if(Core.config.getLogLevel() >= level) {
 			log.log(Level.INFO,"ID:"+count+" Class:"+class_name+" "+message);
 		}
 	}

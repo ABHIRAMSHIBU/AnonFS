@@ -14,7 +14,7 @@ public class TCPServer {
 			    while(true) {
 			    	Socket clientSocket = serverSocket.accept();
 			    	long id = Core.cIDHandle.genID();
-			    	Core.logManager.log(this.getClass().getName(), "IP: " + clientSocket.getInetAddress().getHostAddress() + " Accepted Connection "+count);
+			    	Core.logManager.log(this.getClass().getName(), "IP: " + clientSocket.getInetAddress().getHostAddress() + " Accepted Connection "+count,2);
 			    	(new TCPHander(clientSocket,count,true)).start();
 			    	count++;
 			    }

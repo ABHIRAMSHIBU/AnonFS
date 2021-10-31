@@ -115,7 +115,7 @@ public class ConfigInit {
 					+ "# written or read from during the operation of your node. \n"
 					+ "# To change the directory where pieces is written, edit the line below \n"
 					+ " \n"
-					+ "PEER_ROOT=/var/lib/AnonFS/PIECES/ \n"
+					+ "PEER_ROOT=/var/lib/AnonFS/ \n"
 					+ "\n"
 					+ "[logging]\n"
 					+ "# Log level n means all logs greator than n and all log equal to n will be printed \n"
@@ -124,6 +124,7 @@ public class ConfigInit {
 					+ "");
 			pw.close();
 		}
+		// Please don't use loglevel here as loglevel is not yet avaiable as of now.
 		else {
 			Core.logManager.log(this.getClass().getName(), "Configuration file exists, reading.");
 		}
@@ -135,5 +136,24 @@ public class ConfigInit {
 	}
 	public String getBootStrapPeer() {
 		return ini.fetch("network", "BOOTSTRAP_PEER");
+	}
+	public String getPeerRoot() {
+		String root = ini.fetch("disk", "PEER_ROOT");
+		if(root == null) {
+			return "store";
+		}
+		else {
+			return root;
+		}
+		
+	}
+	public int getLogLevel() {
+		String logLevel = ini.fetch("logging", "LOG_LEVEL");
+		if(logLevel==null) {
+			return 5;
+		}
+		else {
+			return Integer.parseInt(logLevel);
+		}
 	}
 }

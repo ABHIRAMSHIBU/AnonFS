@@ -117,6 +117,10 @@ public class ConfigInit {
 					+ " \n"
 					+ "PEER_ROOT=/var/lib/AnonFS/PIECES/ \n"
 					+ "\n"
+					+ "[logging]\n"
+					+ "# Log level n means all logs greator than n and all log equal to n will be printed \n"
+					+ ""
+					+ "LOG_LEVEL=5\n"
 					+ "");
 			pw.close();
 		}
@@ -125,6 +129,9 @@ public class ConfigInit {
 		}
 		ini = new Ini(configFile);
 		Core.logManager.log(this.getClass().getName(),"Configuration Parsed-> "+ini.toString());
+	}
+	public Ini getIni() {
+		return ini;
 	}
 	public String getBootStrapPeer() {
 		return ini.fetch("network", "BOOTSTRAP_PEER");

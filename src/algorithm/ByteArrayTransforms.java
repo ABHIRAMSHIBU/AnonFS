@@ -38,4 +38,26 @@ public class ByteArrayTransforms {
 		}
 		return out;
 	}
+	
+	public static String toHexString(byte [] in) {
+		String hexout = "";
+		for(int i=0;i<in.length;i++) {
+			try {
+				String hex = Integer.toHexString(in[i]);
+				if(hex.length()==1) {
+					hex = "0"+hex;
+				}
+				else {
+					hex = hex.substring(hex.length()-2,hex.length());
+				}
+				hexout+=hex;
+				System.out.println(hex+" "+in[i]);
+			}
+			catch (StringIndexOutOfBoundsException e) {
+				throw e;
+			}
+		}
+		return hexout;
+	}
+	
 }

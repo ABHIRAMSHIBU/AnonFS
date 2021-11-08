@@ -2,3 +2,4 @@ bin
 /build/
 AnonFSd.conf
 AnonFSd.log
+store/

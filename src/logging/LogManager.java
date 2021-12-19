@@ -14,6 +14,7 @@ public class LogManager {
 	static FileHandler fh;
 	static SimpleFormatter formatter;
 	static Logger log = Logger.getLogger("");
+	public static boolean failure = true;
 	public LogManager() {
 		try {
 			LogManager.fh = new FileHandler("AnonFSd.log");
@@ -34,6 +35,7 @@ public class LogManager {
 		}
 		System.setProperty("java.util.logging.SimpleFormatter.format",
 	              "[%1$tF %1$tT] [%4$-7s] %5$s %n");
+		failure = false;
 	}
 	public LogManager(String logFile) {
 		try {
@@ -55,6 +57,7 @@ public class LogManager {
 		}
 		System.setProperty("java.util.logging.SimpleFormatter.format",
 	              "[%1$tF %1$tT] [%4$-7s] %5$s %n");
+		failure = false;
 	}
 	public void log(String class_name,String message, int level) {
 		if(Core.config.getLogLevel() >= level) {

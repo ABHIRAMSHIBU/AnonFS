@@ -12,6 +12,7 @@ import core.Core;
 
 public class PeerDataHandler{
 	HashMap<String, ArrayList<Object>> data;
+	public boolean failure = true;
 	/**data has a String and ArrayList
 	 * String is used to store ip address
 	 * ArrayList is used to store information about the peer and how to communicate
@@ -25,6 +26,7 @@ public class PeerDataHandler{
 	 **/
 	public PeerDataHandler() {
 		this.create();
+		failure = false;
 	}
 	
 	public void create() {

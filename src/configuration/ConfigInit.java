@@ -11,6 +11,7 @@ public class ConfigInit {
 	PrintWriter pw ;
 	File configFile = new File("AnonFSd.conf");
 	Ini ini;
+	public boolean failure = true;
 	public ConfigInit() throws IOException{
 		/**Its supposed to initialize the configuration for basic configuration
 		 * */
@@ -130,6 +131,7 @@ public class ConfigInit {
 		}
 		ini = new Ini(configFile);
 		Core.logManager.log(this.getClass().getName(),"Configuration Parsed-> "+ini.toString());
+		failure = false;
 	}
 	public Ini getIni() {
 		return ini;

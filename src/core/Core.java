@@ -54,17 +54,21 @@ public class Core {
     	if(pieces.get(0).toString().equals(testpiece.toString())) {
     		logManager.log(Core.class.getName(), "Piece Serialization Test Success");
     	}
-//    	PieceDiskStorage pds = new PieceDiskStorage();
-//    	pds.diskinit();
-//    	try {
-//    		logManager.log(Core.class.getName(), "Writing Piece with checksum:"+new String(Base64.encode(pieces.get(0).checksum)));
-//    		pds.pieceToDisk(pieces.get(0));
-//    		Piece p = pds.diskToPiece(ByteArrayTransforms.toHexString(pieces.get(0).checksum));
-//    		logManager.log(Core.class.getName(), "Read piece with checksum:"+ new String(Base64.encode(p.checksum)));
-//		} catch (IOException | ClassNotFoundException e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
+    	
+    	PieceDiskStorage pds = new PieceDiskStorage();
+    	pds.diskinit();
+    	try {
+    		logManager.log(Core.class.getName(), "Writing Piece with checksum:"+new String(Base64.encode(pieces.get(0).checksum)));
+    		pds.pieceToDisk(pieces.get(0));
+    		Piece p = pds.diskToPiece(ByteArrayTransforms.toHexString(pieces.get(0).checksum));
+    		logManager.log(Core.class.getName(), "Read piece with checksum:"+ new String(Base64.encode(p.checksum)));
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     	
     	
     	

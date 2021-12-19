@@ -1,8 +1,12 @@
 package filesystem;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -54,18 +58,52 @@ public class PieceDiskStorage {
 	
 	/**
 	 * Writes a piece to disk
-	 * @param p
+	 * @param p - Piece to write to disk.
 	 * @return True if write was success False if not.
+	 * @throws IOException 
 	 */
-	public boolean pieceToDisk(Piece p) {
-		return false;
+	public boolean pieceToDisk(Piece p) throws IOException {
+		String checksum = ByteArrayTransforms.toHexString(p.checksum);
+		Core.logManager.log(this.getClass().getName(),"Writing file with checksum base64 encoded as: "+checksum,3);
+		File outputFile = new File((Paths.get(storageLocation,"pieces",checksum+".bin").toString()));
+		if(outputFile.exists()) {
+			Core.logManager.log(this.getClass().getName(), "File already exists!",4);
+			return false;
+		}
+		else {
+			Core.logManager.log(this.getClass().getName(), "File does not  exist, writing",4);
+			BufferedWriter fileOut = new BufferedWriter(new FileWriter(outputFile));
+			fileOut.write(p.toString()+"\n");
+			
+//			FileOutputStream fileOut = new FileOutputStream(outputFile);
+//			ObjectOutputStream objectToFile = new ObjectOutputStream(fileOut);
+//			objectToFile.writeObject(p);
+//			objectToFile.close();
+			fileOut.close();
+			return true;
+		}
 	}
 	
 	/**
 	 * Reads the piece from the disk and constructs the datastructure.
+	 * @param checksum
 	 * @return Piece if read success, null if read failure or checksum failure.
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
 	 */
-	public Piece diskToPiece() {
-		return null;
+	public Piece diskToPiece(String checksum) throws ClassNotFoundException, IOException {
+		File inputFile = new File((Paths.get(storageLocation,"pieces",checksum+".bin").toString()));
+		if(! inputFile.exists()) {
+			return null;
+		}
+		else {
+			BufferedReader fileIn = new BufferedReader(new FileReader(inputFile));
+			Piece p = new Piece();
+			p.fromString(fileIn.readLine());  
+			fileIn.close();
+			Core.logManager.log(this.getClass().getName(),"Read file with checksum base64 encoded as: "+new String(Base64.encode(p.checksum)),3);
+			return p;
+		}
 	}
+	// TODO: Need to add timetolive
 }

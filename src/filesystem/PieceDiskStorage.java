@@ -17,6 +17,7 @@ import algorithm.FileTransforms;
 import cryptography.Base64;
 
 import core.Core;
+import datastructures.MetaDataHandler;
 import datastructures.Piece;
 
 public class PieceDiskStorage {
@@ -106,4 +107,22 @@ public class PieceDiskStorage {
 		}
 	}
 	// TODO: Need to add timetolive
+	
+	public boolean piecesToDisk(Piece [] p) throws IOException {
+		boolean ret = true;
+		for(int i=0; i<p.length; i++) {
+			ret = ret && pieceToDisk(p[i]);
+		}
+		return ret;
+	}
+	
+	public Piece [] getPiecesWithMetaData(MetaDataHandler mdh) throws ClassNotFoundException, IOException {
+		Piece [] ret = new Piece[mdh.size()];
+		for(int i=0;i<mdh.size();i++) {
+			byte [] checksum = mdh.getEntry(i);
+			ret[i] = diskToPiece(new String(ByteArrayTransforms.toCharArray(checksum)));
+		}
+		return ret;
+		
+	}
 }

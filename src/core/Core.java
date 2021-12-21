@@ -1,5 +1,9 @@
 package core;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.LinkedList;
 
 import algorithm.ByteArrayTransforms;
@@ -24,10 +28,12 @@ public class Core {
 	public static ConfigInit config;
 	public static ConnectionIDHander cIDHandle;
 	public static PeerUIDHander UIDHander;
+	public static PieceDiskStorage pieceDiskStorage;
     public static void runmain(String[] args) {
     	UIDHander = new PeerUIDHander();
     	logManager = new LogManager();
     	MetaDataHandler mdh = new MetaDataHandler();
+    	pieceDiskStorage = new PieceDiskStorage();
     	
     	logManager.log(Core.class.getName(), "Welcome to AnonFS version: "+Configuration.version+" core now alive!");
     	logManager.log(Core.class.getName(), "UID:"+UIDHander.getUIDString());
@@ -38,6 +44,8 @@ public class Core {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+    	
+    	pieceDiskStorage.diskinit();
     	
     	LinkedList<Piece> pieces = FileTransforms.FileToPices("/proc/cmdline", 40, mdh);
     	logManager.log(Core.class.getName(),"Pieces:"+new String(mdh.getEntry(0)));
@@ -55,21 +63,72 @@ public class Core {
     		logManager.log(Core.class.getName(), "Piece Serialization Test Success");
     	}
     	
-    	PieceDiskStorage pds = new PieceDiskStorage();
-    	pds.diskinit();
+//    	try {
+//    		logManager.log(Core.class.getName(), "Writing Piece with checksum:"+new String(Base64.encode(pieces.get(0).checksum)));
+//    		pds.pieceToDisk(pieces.get(0));
+//    		Piece p = pds.diskToPiece(ByteArrayTransforms.toHexString(pieces.get(0).checksum));
+//    		logManager.log(Core.class.getName(), "Read piece with checksum:"+ new String(Base64.encode(p.checksum)));
+//		} catch (IOException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		} catch (ClassNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
     	try {
-    		logManager.log(Core.class.getName(), "Writing Piece with checksum:"+new String(Base64.encode(pieces.get(0).checksum)));
-    		pds.pieceToDisk(pieces.get(0));
-    		Piece p = pds.diskToPiece(ByteArrayTransforms.toHexString(pieces.get(0).checksum));
-    		logManager.log(Core.class.getName(), "Read piece with checksum:"+ new String(Base64.encode(p.checksum)));
+    		pieceDiskStorage.piecesToDisk(pieces);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		} catch (ClassNotFoundException e) {
+		}
+    	
+    	try {
+			LinkedList<Piece> piece_bkp = pieceDiskStorage.getPiecesWithMetaData(mdh);
+			int count = 0;
+			for(int i=0;i<pieces.size();i++) {
+	    		if(pieces.get(i).toString().equals(piece_bkp.get(i).toString())) {
+	    			count+=1;
+	    		}
+	    		else {
+	    			logManager.critical(Core.class.getName(),"getPieces: Failed "+i);
+	    			logManager.critical(Core.class.getName(),pieces.get(i).toString());
+	    			logManager.critical(Core.class.getName(),piece_bkp.get(i).toString());
+	    		}
+	    	}
+			if(count==pieces.size()) {
+				logManager.log(Core.class.getName(),"getPieces: PASS");
+			}
+			else {
+				logManager.log(Core.class.getName(),"getPieces: Failed");
+			}
+		} catch (ClassNotFoundException | IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+    	
+    	
+    	
+    	logManager.log(Core.class.getName(),mdh.toString());
+    	MetaDataHandler mdh_temp = new MetaDataHandler();
+    	try {
+			mdh_temp.fromString(mdh.toString());
+			logManager.log(Core.class.getName(),mdh_temp.toString());
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    	
+    	// Not working so Message Data Handler is not serializable.
+//    	try {
+//			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("test"));
+//			oos.writeObject(mdh);
+//			oos.close();
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
     	
     	
     	TCPServer tcpServer = new TCPServer(Configuration.DEFAULT_PORT);

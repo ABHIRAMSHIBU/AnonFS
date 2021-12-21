@@ -14,6 +14,7 @@ import configuration.Configuration;
 import core.Core;
 import datastructures.CallBackPromise;
 import datastructures.Packet;
+import datastructures.Piece;
 
 public class TCPHander extends Thread {
 	Socket clientSocket;
@@ -203,7 +204,15 @@ public class TCPHander extends Thread {
 					    	
 					    	// Command GetPiece
 					    	else if(message.startsWith("GetPiece")) {
-					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
+					    		message = message.substring(8);
+					    		Core.logManager.log(this.getClass().getName(), "Command GetPiece Data:"+message);
+					    		Piece piece = Core.pieceDiskStorage.diskToPiece(message);
+					    		if(piece==null) {
+					    			packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("PDNE!"+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
+					    		}
+					    		else {
+					    			packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray(piece.toString()+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
+					    		}
 					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
 					    		out.flush();
 					    		// TODO Implement GetPiece

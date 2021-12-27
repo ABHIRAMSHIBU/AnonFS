@@ -195,14 +195,27 @@ public class TCPHander extends Thread {
 					    	}
 					    	
 					    	// Command PushPiece
+					    	// TODO: Implement handler for Message empty or invalid.
 					    	else if(message.startsWith("PushPiece")) {
-					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
+					    		message = message.substring(9);
+					    		Core.logManager.log(this.getClass().getName(), "Command PushPiece Data:"+message);
+					    		Piece piece = new Piece();
+					    		piece.fromString(message);
+					    		if(Core.pieceDiskStorage.pieceToDisk(piece)) {	
+					    			// Write success
+					    			packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("ACK"+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
+					    		}
+					    		else {
+					    			// Write Fail
+					    			packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("NACK"+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
+					    		}
 					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
 					    		out.flush();
 					    		// TODO Implement PushPiece
 					    	}
 					    	
 					    	// Command GetPiece
+					    	// TODO: Implement handler for Message empty or invalid.
 					    	else if(message.startsWith("GetPiece")) {
 					    		message = message.substring(8);
 					    		Core.logManager.log(this.getClass().getName(), "Command GetPiece Data:"+message);

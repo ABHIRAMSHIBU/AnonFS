@@ -130,7 +130,8 @@ public class Core {
 //			e.printStackTrace();
 //		}
     	
-    	
+    	CLIHandler cliHandler = new CLIHandler();
+    	cliHandler.start();
     	TCPServer tcpServer = new TCPServer(Configuration.DEFAULT_PORT);
     }
     /**

@@ -146,9 +146,10 @@ AnonFS-{UUID} # example command
 		else if(in.startsWith("list")) {
 			in = in.substring(4).strip();
 			if(in.startsWith("--peers") || in.startsWith("-p")) {
+				output+="IP/URL\t\tUID\n";
 				LinkedList<String> peerlist = Core.pdh.getPeers();
 				for(int i=0;i<peerlist.size();i++) {
-					output+=peerlist.get(i)+" ";
+					output+=peerlist.get(i)+"\t"+Core.pdh.getUID(peerlist.get(i))+"\n";
 				}
 			}
 		}
@@ -163,9 +164,11 @@ AnonFS-{UUID} # example command
 		}
 		else if(in.startsWith("upload")) {
 			in = in.substring(6).strip();
+			Core.tradeHandler.uplink(in);
 		}
 		else if(in.startsWith("download")) {
 			in = in.substring(6).strip();
+			Core.tradeHandler.downlink(in);
 		}
 		else if(in.startsWith("help")) {
 			output=help;

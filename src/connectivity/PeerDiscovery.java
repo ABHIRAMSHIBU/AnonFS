@@ -75,6 +75,7 @@ public class PeerDiscovery extends Thread {
 								Core.logManager.log(this.getClass().getName(), "No Loop detected "+peer,4);
 								selfHost = 0;
 							}
+							pdh.setUID(peer, new String(recievedData1));
 						}
 						try {
 							pdh.setSelfHost(peer, selfHost);
@@ -123,9 +124,14 @@ public class PeerDiscovery extends Thread {
 					String ipList[] = (new String(recievedData)).split("\n");
 					LinkedList<String> peers =  Core.pdh.getPeers();
 					for(int k=0;k<ipList.length;k++) {
+						System.out.println(ipList[k]);
 						if(peers.indexOf(ipList[k])==-1) {
-							new TCPClient(ipList[k]);
+							String [] potentialPeer = ipList[k].split("\t");
+							new TCPClient(potentialPeer[0]);
 							Core.logManager.log(this.getClass().getName(), "Connecting "+ipList[k],4);
+							if(potentialPeer.length==2) {
+								Core.pdh.setUID(potentialPeer[0],potentialPeer[1]);
+							}
 						}
 						else {
 							Core.logManager.log(this.getClass().getName(), "Already exists "+ipList[k],4);

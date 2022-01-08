@@ -176,11 +176,12 @@ public class TCPHander extends Thread {
 					    		String peerString="";
 					    		LinkedList<String> peerList = Core.pdh.getPeers();
 					    		for(int i=0;i<peerList.size();i++) {
-					    			peerString+=peerList.get(i);
+					    			peerString+=peerList.get(i)+"\t"+Core.pdh.getUID(peerList.get(i));
 					    			if(i+1<peerList.size()) {
 					    				peerString+="\n";
 					    			}
 					    		}
+					    		System.out.println("PeerString:"+peerString);
 					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray(peerString), Packet.REPLY, 1, (byte) packet.get("id"));
 					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
 					    		out.flush();

@@ -1,11 +1,14 @@
 package datastructures;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 
 import algorithm.ByteArrayTransforms;
+import cryptography.SHA512;
 
 public class MetaDataHandler {
 	HashMap<Long, byte[]> table = new HashMap<Long, byte[]>();
+	byte [] checksum = null;
 	
 	/**
 	 * Inserts the checksum of a piece into the hashmap.
@@ -59,4 +62,21 @@ public class MetaDataHandler {
 			index = input.indexOf("\n",oldindex+1);
 		}
 	}
+	
+	public void calculateChecksum() {
+		try {
+			checksum = SHA512.digest(ByteArrayTransforms.toByteArray(toString()));
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public byte [] getChecksum() {
+		if(checksum==null) {
+			calculateChecksum();
+		}
+		return checksum;
+	}
+	
 }

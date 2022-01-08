@@ -18,6 +18,7 @@ import cryptography.Base64;
 import datastructures.MetaDataHandler;
 import datastructures.PeerDataHandler;
 import datastructures.Piece;
+import filesystem.MetadataDiskStorage;
 import filesystem.PieceDiskStorage;
 import logging.LogManager;
 
@@ -29,11 +30,13 @@ public class Core {
 	public static ConnectionIDHander cIDHandle;
 	public static PeerUIDHander UIDHander;
 	public static PieceDiskStorage pieceDiskStorage;
+	public static MetadataDiskStorage metadataDiskStorage;
     public static void runmain(String[] args) {
     	UIDHander = new PeerUIDHander();
     	logManager = new LogManager();
     	MetaDataHandler mdh = new MetaDataHandler();
     	pieceDiskStorage = new PieceDiskStorage();
+    	metadataDiskStorage = new MetadataDiskStorage();
     	
     	logManager.log(Core.class.getName(), "Welcome to AnonFS version: "+Configuration.version+" core now alive!");
     	logManager.log(Core.class.getName(), "UID:"+UIDHander.getUIDString());
@@ -46,6 +49,7 @@ public class Core {
 		}
     	
     	pieceDiskStorage.diskinit();
+    	metadataDiskStorage.diskinit();
     	
     	LinkedList<Piece> pieces = FileTransforms.FileToPices("/proc/cmdline", 40, mdh);
     	logManager.log(Core.class.getName(),"Pieces:"+new String(mdh.getEntry(0)));
@@ -83,6 +87,29 @@ public class Core {
 		}
     	
     	try {
+			metadataDiskStorage.metadataToDisk(mdh);
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+    	
+    	try {
+			MetaDataHandler mdh1 =  metadataDiskStorage.diskToMetadata(new String(ByteArrayTransforms.toHexString(mdh.getChecksum())));
+			if(mdh.toString().equals(mdh1.toString())) {
+				System.out.println("Metadata dump, restore success!");
+			}
+			else {
+				System.out.println("Metadata dump/restore failed!");
+				System.out.println("mdh1="+mdh1.toString());
+				System.out.println("mdh="+mdh.toString());
+				
+			}
+    	} catch (ClassNotFoundException | IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+    	
+    	try {
 			LinkedList<Piece> piece_bkp = pieceDiskStorage.getPiecesWithMetaData(mdh);
 			int count = 0;
 			for(int i=0;i<pieces.size();i++) {
@@ -107,16 +134,7 @@ public class Core {
 		}
     	
     	
-    	
-    	logManager.log(Core.class.getName(),mdh.toString());
-    	MetaDataHandler mdh_temp = new MetaDataHandler();
-    	try {
-			mdh_temp.fromString(mdh.toString());
-			logManager.log(Core.class.getName(),mdh_temp.toString());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+    
     	// Not working so Message Data Handler is not serializable.
 //    	try {
 //			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("test"));
@@ -203,6 +221,31 @@ public class Core {
     	else {
     		logManager.log(Core.class.getName(), "PeerDataHandler: Failure");
     	}
+    	
+    	// MetaData disk handle test
+    	metadataDiskStorage = new MetadataDiskStorage();
+    	metadataDiskStorage.diskinit();
+    	try {
+			metadataDiskStorage.metadataToDisk(mdh);
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+    	try {
+			MetaDataHandler mdh1 =  metadataDiskStorage.diskToMetadata(new String(ByteArrayTransforms.toHexString(mdh.getChecksum())));
+			if(mdh.toString().equals(mdh1.toString())) {
+				logManager.log(Core.class.getName(),"Metadata dump, restore success!");
+			}
+			else {
+				logManager.log(Core.class.getName(),"Metadata dump/restore failed!");
+				logManager.log(Core.class.getName(),"mdh1="+mdh1.toString());
+				logManager.log(Core.class.getName(),"mdh="+mdh.toString());
+				
+			}
+    	} catch (ClassNotFoundException | IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
     	// AutoConnector Needs External TEST
     	// Peer Discovery Needs External TEST
     	// TCP Server Needs External TEST

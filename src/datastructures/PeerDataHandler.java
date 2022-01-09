@@ -61,6 +61,7 @@ public class PeerDataHandler{
 			al.add(4, tcpHandler);
 			al.add(5, connected);
 			al.add(6, selfhost);
+			al.add(7, new String(""));
 			data.put(peerIP, al);
 			return true;
 		}
@@ -101,8 +102,11 @@ public class PeerDataHandler{
 	 * @return
 	 */
 	public TCPHander getTCPHander(String peerIP) {
+		System.out.println("LEG1");
 		ArrayList<Object> al = data.get(peerIP);
+		System.out.println("LEG1");
 		TCPHander tcpHandler = (TCPHander) al.get(4);
+		System.out.println("LEG1");
 		return tcpHandler;
 	}
 	/**
@@ -117,7 +121,7 @@ public class PeerDataHandler{
 	}
 	
 	/**
-	 * Returns in which is a boolean which says connection was inbound or outbound given a valid peer, if not valid no idea about behavior
+	 * Returns in which is a boolean which says if a peer is connected.
 	 * @param peerIP
 	 * @return
 	 */
@@ -158,6 +162,17 @@ public class PeerDataHandler{
 		/** Sets reply Queue of a peer given a valid peer, if not valid no idea about behavior **/
 		ArrayList<Object> al = data.get(peerIP);
 		return (int) al.get(6);
+	}
+	
+	/**
+	 * Returns the UID of the peer if available
+	 * @param peerIP
+	 * @return Integer with value -1,0,1 -> Not Sure, Not Loop, Is Loop
+	 */
+	public String getUID(String peerIP) {
+		/** Sets reply Queue of a peer given a valid peer, if not valid no idea about behavior **/
+		ArrayList<Object> al = data.get(peerIP);
+		return (String) al.get(7);
 	}
 	
 	/**
@@ -227,6 +242,17 @@ public class PeerDataHandler{
 		else {
 			throw new Exception("Invalid Argument Value "+SelfHost+" !");
 		}
+	}
+	
+	/**
+	 * Sets connected status of a peer given a valid peer, if not valid no idea about behavior
+	 * @param peerIP
+	 * @param connected
+	 */
+	public void setUID(String peerIP,String UID) {
+		/** Sets reply Queue of a peer given a valid peer, if not valid no idea about behavior **/
+		ArrayList<Object> al = data.get(peerIP);
+		al.set(7, UID);
 	}
 	
 	/**

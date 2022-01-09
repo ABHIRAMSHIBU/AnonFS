@@ -69,6 +69,7 @@ public class Piece {
 	 * @return
 	 */
 	public void fromString(String in) {
+//		System.out.println("MESSAGE:"+in);
 		byte [] message = ByteArrayTransforms.HexStringToBytes(in);
 		int signaturelength = 0;
 		

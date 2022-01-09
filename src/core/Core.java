@@ -31,12 +31,14 @@ public class Core {
 	public static PeerUIDHander UIDHander;
 	public static PieceDiskStorage pieceDiskStorage;
 	public static MetadataDiskStorage metadataDiskStorage;
+	public static TradeHandler tradeHandler;
     public static void runmain(String[] args) {
     	UIDHander = new PeerUIDHander();
     	logManager = new LogManager();
     	MetaDataHandler mdh = new MetaDataHandler();
     	pieceDiskStorage = new PieceDiskStorage();
     	metadataDiskStorage = new MetadataDiskStorage();
+    	tradeHandler = new TradeHandler();
     	
     	logManager.log(Core.class.getName(), "Welcome to AnonFS version: "+Configuration.version+" core now alive!");
     	logManager.log(Core.class.getName(), "UID:"+UIDHander.getUIDString());

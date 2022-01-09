@@ -40,7 +40,7 @@ public class PeerDiscovery extends Thread {
 				byte packet[] = (byte[]) packetWrapper.get("packet");
 				byte packetid = (byte) packetWrapper.get("id");
 				
-				// We dont know if its a self loop.
+				// We don't know if its a self loop.
 				CallBackPromise cbp = new CallBackPromise(packetid);
 				if(selfHost == -1) {
 					try {
@@ -55,8 +55,10 @@ public class PeerDiscovery extends Thread {
 							}
 							else {
 								Core.logManager.log(this.getClass().getName(), "Socket is open proceeding for peer "+peer,4);
-								osw.write(ByteArrayTransforms.toCharArray(packet1));
-								osw.flush();
+								synchronized (osw) {
+									osw.write(ByteArrayTransforms.toCharArray(packet1));
+									osw.flush();
+								}
 								cbp1.wait();
 							}
 							
@@ -103,8 +105,10 @@ public class PeerDiscovery extends Thread {
 				synchronized (cbp) {
 					try {
 						qcallback.add(cbp);
-						osw.write(ByteArrayTransforms.toCharArray(packet));
-						osw.flush();
+						synchronized (osw) {
+							osw.write(ByteArrayTransforms.toCharArray(packet));
+							osw.flush();
+						}
 						Core.logManager.log(this.getClass().getName(), "Going to wait on Call Back Promise ID:"+handler.p.getCreatedID(),4);
 						cbp.wait();
 						Core.logManager.log(this.getClass().getName(), "Wait finished on Call Back Promise",4);
@@ -124,14 +128,9 @@ public class PeerDiscovery extends Thread {
 					String ipList[] = (new String(recievedData)).split("\n");
 					LinkedList<String> peers =  Core.pdh.getPeers();
 					for(int k=0;k<ipList.length;k++) {
-						System.out.println(ipList[k]);
 						if(peers.indexOf(ipList[k])==-1) {
-							String [] potentialPeer = ipList[k].split("\t");
-							new TCPClient(potentialPeer[0]);
+							new TCPClient(ipList[k]);
 							Core.logManager.log(this.getClass().getName(), "Connecting "+ipList[k],4);
-							if(potentialPeer.length==2) {
-								Core.pdh.setUID(potentialPeer[0],potentialPeer[1]);
-							}
 						}
 						else {
 							Core.logManager.log(this.getClass().getName(), "Already exists "+ipList[k],4);

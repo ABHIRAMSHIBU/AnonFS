@@ -22,6 +22,8 @@ public class TCPHander extends Thread {
 	boolean server;
 	public Packet p ;
 	boolean redudantConnection = false;
+	OutputStreamWriter out;
+	InputStreamReader in;
 	TCPHander(Socket clientSocket,long id2, boolean server) throws IOException {
 		this.clientSocket=clientSocket;
 		this.id = id2;
@@ -33,7 +35,8 @@ public class TCPHander extends Thread {
 		
 		synchronized(Core.pdh) {
 			if(! Core.pdh.entryExists(clientSocket.getInetAddress().getHostAddress())) {
-				Core.pdh.addPeer(clientSocket.getInetAddress().getHostAddress(), server, new OutputStreamWriter(clientSocket.getOutputStream()), q, this, true);
+				out = new OutputStreamWriter(clientSocket.getOutputStream());
+				Core.pdh.addPeer(clientSocket.getInetAddress().getHostAddress(), server, out, q, this, true);
 				Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" added to Peer DB",3);
 			}
 			else {
@@ -123,9 +126,8 @@ public class TCPHander extends Thread {
 			return;
 		}
 		try { 
-			    OutputStreamWriter out = new OutputStreamWriter(clientSocket.getOutputStream());
 			    //BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-			    InputStreamReader in = new InputStreamReader(clientSocket.getInputStream());
+			    in = new InputStreamReader(clientSocket.getInputStream());
 //			    if(server) {
 //				    out.write("AnonFS "+Configuration.version+"\n");
 //				    out.flush();
@@ -167,8 +169,10 @@ public class TCPHander extends Thread {
 					    	if(message.compareTo("info")==0) {
 					    		Core.logManager.log(this.getClass().getName(), "ClientID:"+id+" asked info",4);
 					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("AnonFS "+Configuration.version+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
-					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
-					    		out.flush();
+					    		synchronized (out) {
+					    			out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
+						    		out.flush();
+								}
 					    	}
 					    	
 					    	// Command GetPeerList
@@ -176,23 +180,26 @@ public class TCPHander extends Thread {
 					    		String peerString="";
 					    		LinkedList<String> peerList = Core.pdh.getPeers();
 					    		for(int i=0;i<peerList.size();i++) {
-					    			peerString+=peerList.get(i)+"\t"+Core.pdh.getUID(peerList.get(i));
+					    			peerString+=peerList.get(i);
 					    			if(i+1<peerList.size()) {
 					    				peerString+="\n";
 					    			}
 					    		}
-					    		System.out.println("PeerString:"+peerString);
 					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray(peerString), Packet.REPLY, 1, (byte) packet.get("id"));
-					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
-					    		out.flush();
+					    		synchronized (out) {
+					    			out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
+						    		out.flush();
+								}
 					    		//TODO Implement GetPeerList
 					    	}
 					    	
 					    	// Command GetUID
 					    	else if(message.compareTo("GetUID")==0) {
 					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray(Core.UIDHander.getUIDString()), Packet.REPLY, 1, (byte) packet.get("id"));
-					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
-					    		out.flush();
+					    		synchronized (out) {
+					    			out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
+						    		out.flush();
+								}
 					    	}
 					    	
 					    	// Command PushPiece
@@ -201,18 +208,22 @@ public class TCPHander extends Thread {
 					    		message = message.substring(9);
 					    		Core.logManager.log(this.getClass().getName(), "Command PushPiece Data:"+message);
 					    		Piece piece = new Piece();
-					    		piece.fromString(message);
-					    		if(Core.pieceDiskStorage.pieceToDisk(piece)) {	
-					    			// Write success
-					    			packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("ACK"+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
+					    		if(!message.equals("")) {
+						    		piece.fromString(message);
+						    		if(Core.pieceDiskStorage.pieceToDisk(piece)) {	
+						    			// Write success
+						    			packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("ACK"+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
+						    		}
+						    		else {
+						    			// Write Fail
+						    			packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("NACK"+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
+						    		}
+						    		synchronized (out) {
+						    			out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
+							    		out.flush();
+									}
+						    		// TODO Implement PushPiece
 					    		}
-					    		else {
-					    			// Write Fail
-					    			packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("NACK"+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
-					    		}
-					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
-					    		out.flush();
-					    		// TODO Implement PushPiece
 					    	}
 					    	
 					    	// Command GetPiece
@@ -222,36 +233,45 @@ public class TCPHander extends Thread {
 					    		Core.logManager.log(this.getClass().getName(), "Command GetPiece Data:"+message);
 					    		Piece piece = Core.pieceDiskStorage.diskToPiece(message);
 					    		if(piece==null) {
+					    			// PDNE -> Piece Do Not Exist
 					    			packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("PDNE!"+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
 					    		}
 					    		else {
 					    			packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray(piece.toString()+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
 					    		}
-					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
-					    		out.flush();
+					    		synchronized (out) {
+					    			out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
+						    		out.flush();
+								}
 					    		// TODO Implement GetPiece
 					    	}
 					    	
 					    	// Command FindPiece
 					    	else if(message.startsWith("FindPiece")) {
 					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
-					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
-					    		out.flush();
+					    		synchronized (out) {
+					    			out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
+						    		out.flush();
+								}
 					    		// TODO Implement FindPiece
 					    	}
 					    	
 					    	// Command MyIP
 					    	else if(message.startsWith("MyIP")) {
 					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray(clientSocket.getInetAddress().getHostAddress()+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
-					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
-					    		out.flush();
+					    		synchronized (out) {
+					    			out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
+						    		out.flush();
+								}
 					    	}
 					    	
 					    	// Command is not valid error condition
 					    	else {
 					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("Invalid command!"+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
-					    		out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
-					    		out.flush();
+					    		synchronized (out) {
+					    			out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
+						    		out.flush();
+								}
 					    	}
 				    	}
 				    	
@@ -301,6 +321,7 @@ public class TCPHander extends Thread {
 			e.printStackTrace();
 		}
 	}
+	// TODO: Probably dead code.. if yes please remove
 	public static byte [] sendRequestGetData(String ip,String request) throws IOException, InterruptedException {
 		synchronized (Core.pdh) {
 			OutputStreamWriter osw = Core.pdh.getOutputStream(ip);
@@ -310,7 +331,10 @@ public class TCPHander extends Thread {
 			CallBackPromise cbp = new CallBackPromise(id);
 			Core.pdh.getReplyQueue(ip).add(cbp);
 			synchronized (cbp) {
-				osw.write(ByteArrayTransforms.toCharArray(packet));
+				synchronized (osw) {
+					osw.write(ByteArrayTransforms.toCharArray(packet));
+					osw.flush();
+				}
 				cbp.wait();
 			}
 			return cbp.data;

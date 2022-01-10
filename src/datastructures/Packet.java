@@ -44,6 +44,12 @@ public class Packet {
 			message[i]=(byte) ((0xFF<<(i*8) & ((long)data.length+21))>>(i*8));
 			//Core.logManager.log(this.getClass().getName(), "Byte at "+i+" is "+Byte.toUnsignedInt(message[i]) );
 		}
+		long size=0;
+		for(int i=0;i<8;i++) {
+			size = size | (Byte.toUnsignedInt(message[i])<<(i*8));
+			//Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(message[i]));
+		}
+		Core.logManager.log(this.getClass().getName(), "Create Packet Decoded size: "+size);
 		// Set flags
 		message[8]=flags;
 		// Set id
@@ -94,7 +100,7 @@ public class Packet {
 			//Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(message[i]));
 		}
 		this._size=size;
-		//Core.logManager.log(this.getClass().getName(), "Size is "+size);
+		Core.logManager.log(this.getClass().getName(), "DecodePacket Size is "+size);
 		byte[] data = new byte[size-21];
 		this._data=data;
 		// Get flags
@@ -206,7 +212,7 @@ public class Packet {
 				size = size | (Byte.toUnsignedInt(b)<<(i*8));
 				//Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(b));
 			}
-			//Core.logManager.log(this.getClass().getName(), "Got size "+size);
+			Core.logManager.log(this.getClass().getName(), "Streamreader got size: "+size);
 			//Read Packet Size.
 			char packet[]=new char[size];
 			in.read(packet,8,size-8);

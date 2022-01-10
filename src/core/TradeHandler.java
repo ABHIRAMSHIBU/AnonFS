@@ -72,19 +72,13 @@ public class TradeHandler {
 			OutputStreamWriter osw;
 			int selfHost;
 			synchronized (pdh) {
-				System.out.println("Bla-3 "+chosen_peer_list);
 				handler = pdh.getTCPHander(chosen_peer_list.get(0));
-				System.out.println("Meh1");
 				qcallback = pdh.getReplyQueue(chosen_peer_list.get(0));
-				System.out.println("Meh2");
 				osw = pdh.getOutputStream(chosen_peer_list.get(0));
-				System.out.println("Meh3");
 				selfHost = pdh.getSelfHost(chosen_peer_list.get(0));
 			}
 //			System.out.println("SEND:"+piece.toString()+"Length:"+piece.toString().length());
-			System.out.println("Bla-2");
 			byte [] temp = ByteArrayTransforms.toByteArray("PushPiece"+piece.toString());
-			System.out.println("Bla-1");
 //			System.out.println(temp.length);
 			HashMap<String, Object> packetWrapper = handler.p.createPacket(temp,
 											   					           Packet.REQUEST,
@@ -92,13 +86,9 @@ public class TradeHandler {
 					 													   (byte)0);
 //			handler.p.decodePacket((byte [])packetWrapper.get("packet"));
 //			System.out.println("Decoded Size"+handler.p.getDecodedSize());
-			System.out.println("Bla0");
 			byte packet[] = (byte[]) packetWrapper.get("packet");
-			System.out.println("Bla1");
 			byte packetid = (byte) packetWrapper.get("id");
-			System.out.println("Bla2");
 			CallBackPromise cbp = new CallBackPromise(packetid);
-			System.out.println("Bla3");
 			
 			synchronized (cbp) {
 				try {
@@ -147,13 +137,9 @@ public class TradeHandler {
 		
 		// Get Metadata from disk
 		MetaDataHandler mdh = null;
-		System.out.println("Test1");
 		try {
-			System.out.println("TEST4");
 			mdh = Core.metadataDiskStorage.diskToMetadata(metadataID);
-			System.out.println("Test3-"+mdh.toString());
 			for(long i=0;i<mdh.size();i++) {
-				System.out.println("TEST 5");
 				byte [] piecechecksum = mdh.getEntry(i);
 				
 				// Choose a peer to get file from
@@ -167,7 +153,6 @@ public class TradeHandler {
 						}
 					}
 				}
-				System.out.println("Test2-"+i	);
 				
 				
 				
@@ -184,7 +169,7 @@ public class TradeHandler {
 					osw = pdh.getOutputStream(chosen_peer_list.get(0));
 					selfHost = pdh.getSelfHost(chosen_peer_list.get(0));
 				}
-				
+				System.out.println("Piece Request:"+ByteArrayTransforms.toHexString(piecechecksum));
 				byte [] temp = ByteArrayTransforms.toByteArray("GetPiece"+ByteArrayTransforms.toHexString(piecechecksum));
 				
 				

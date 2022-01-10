@@ -102,11 +102,8 @@ public class PeerDataHandler{
 	 * @return
 	 */
 	public TCPHander getTCPHander(String peerIP) {
-		System.out.println("LEG1");
 		ArrayList<Object> al = data.get(peerIP);
-		System.out.println("LEG1");
 		TCPHander tcpHandler = (TCPHander) al.get(4);
-		System.out.println("LEG1");
 		return tcpHandler;
 	}
 	/**

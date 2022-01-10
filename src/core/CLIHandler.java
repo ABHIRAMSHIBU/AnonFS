@@ -167,7 +167,7 @@ AnonFS-{UUID} # example command
 			Core.tradeHandler.uplink(in);
 		}
 		else if(in.startsWith("download")) {
-			in = in.substring(6).strip();
+			in = in.substring(8).strip();
 			Core.tradeHandler.downlink(in);
 		}
 		else if(in.startsWith("help")) {

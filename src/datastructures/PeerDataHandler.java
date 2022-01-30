@@ -1,6 +1,7 @@
 package datastructures;
 
 import java.io.OutputStreamWriter;
+import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -48,7 +49,7 @@ public class PeerDataHandler{
 	 * @param tcpHandler
 	 * @return
 	 */
-	public boolean addPeer(String peerIP,boolean inconnect, OutputStreamWriter outputStream, Queue<Object> replyQueue, TCPHander tcpHandler, boolean connected) {
+	public boolean addPeer(String peerIP,boolean inconnect, SocketChannel socketChannel, Queue<Object> replyQueue, TCPHander tcpHandler, boolean connected) {
 		if(!data.containsKey(peerIP)) {
 			Core.logManager.log(getClass().getName(), "Adding peer to list with IP:"+peerIP,4);
 			ArrayList<Object> al = new ArrayList<Object>();
@@ -56,7 +57,7 @@ public class PeerDataHandler{
 			int selfhost = -1;
 			al.add(0, id);
 			al.add(1, inconnect);
-			al.add(2, outputStream);
+			al.add(2, socketChannel);
 			al.add(3, replyQueue);
 			al.add(4, tcpHandler);
 			al.add(5, connected);
@@ -133,10 +134,21 @@ public class PeerDataHandler{
 	 * @param peerIP
 	 * @return
 	 */
-	public OutputStreamWriter getOutputStream(String peerIP) {
+	public SocketChannel getOutputStream(String peerIP) { // Legacy @deprecated 
 		ArrayList<Object> al = data.get(peerIP);
-		OutputStreamWriter osw = (OutputStreamWriter) al.get(2);
+		SocketChannel osw = (SocketChannel) al.get(2);
 		return osw;
+	}
+	
+	/**
+	 * Returns OutputStreamWriter of a peer, basically it will give you a connection to write to peer given a valid peer, if not valid no idea about behavior
+	 * @param peerIP
+	 * @return
+	 */
+	public SocketChannel getSocketChannel(String peerIP) {
+		ArrayList<Object> al = data.get(peerIP);
+		SocketChannel socketChannel = (SocketChannel) al.get(2);
+		return socketChannel;
 	}
 	
 	/**
@@ -197,7 +209,17 @@ public class PeerDataHandler{
 	 * @param peerIP
 	 * @param osw
 	 */
-	public void setOutputStream(String peerIP,OutputStreamWriter osw) {
+	public void setOutputStream(String peerIP,SocketChannel osw) { // Legacy @deprecated
+		ArrayList<Object> al = data.get(peerIP);
+		al.set(2, osw);
+	}
+	
+	/**
+	 * Sets SocketChannel which should be the new SocketChannel of peer given a valid peer, if not valid no idea about behavior
+	 * @param peerIP
+	 * @param osw
+	 */
+	public void setSocketChannel(String peerIP,SocketChannel osw) {
 		ArrayList<Object> al = data.get(peerIP);
 		al.set(2, osw);
 	}

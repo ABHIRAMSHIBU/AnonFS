@@ -3,6 +3,8 @@ package datastructures;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.SocketException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 
 import core.Core;
@@ -199,13 +201,12 @@ public class Packet {
 	 * @return raw packet data as binary
 	 * @throws IOException
 	 */
-	public HashMap<String, Object> readInputStreamPacket(InputStreamReader in) throws IOException {
+	public HashMap<String, Object> readInputStreamPacket(SocketChannel socketChannel) throws IOException {
 		try {
 			// First 8 bytes are length so read it.
-			char sizearray[]=new char[8];
-			//Core.logManager.log(this.getClass().getName(), "Reading");
-			in.read(sizearray,0,8);
-			//Core.logManager.log(this.getClass().getName(), "Read");
+			ByteBuffer buffer = ByteBuffer.allocate(8);
+			socketChannel.read(buffer);
+			byte sizearray[]=buffer.array();
 			int size=0;
 			for(int i=0;i<8;i++) {
 				byte b = (byte)sizearray[i];
@@ -214,16 +215,16 @@ public class Packet {
 			}
 			Core.logManager.log(this.getClass().getName(), "Streamreader got size: "+size);
 			//Read Packet Size.
-			char packet[]=new char[size];
-			in.read(packet,8,size-8);
-			for(int i=0;i<8;i++) {
-				packet[i]=sizearray[i];
-			}
+			buffer = ByteBuffer.allocate(size);
+			buffer.put(sizearray);
+			socketChannel.read(buffer);
+			byte packet[]=buffer.array();
+//			in.read(packet,8,size-8);
+//			for(int i=0;i<8;i++) {
+//				packet[i]=sizearray[i];
+//			}
 			//Read the rest of the packet as we know the size.
-			byte packet_byte[]=new byte[size];
-			for(int i=0;i<size;i++) {
-				packet_byte[i]=(byte)packet[i];
-			}
+			byte packet_byte[]=packet;
 			HashMap<String, Object> packetWrapper = decodePacket((byte [])packet_byte);
 			return packetWrapper;
 		}

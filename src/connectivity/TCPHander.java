@@ -5,6 +5,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
+import java.sql.ClientInfoStatus;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -17,14 +20,14 @@ import datastructures.Packet;
 import datastructures.Piece;
 
 public class TCPHander extends Thread {
-	Socket clientSocket;
+	SocketChannel clientSocket;
 	long id;
 	boolean server;
 	public Packet p ;
 	boolean redudantConnection = false;
-	OutputStreamWriter out;
-	InputStreamReader in;
-	TCPHander(Socket clientSocket,long id2, boolean server) throws IOException {
+//	OutputStreamWriter out;
+//	InputStreamReader in;
+	TCPHander(SocketChannel clientSocket,long id2, boolean server) throws IOException {
 		this.clientSocket=clientSocket;
 		this.id = id2;
 		this.server = server;
@@ -34,89 +37,30 @@ public class TCPHander extends Thread {
 		
 		
 		synchronized(Core.pdh) {
-			if(! Core.pdh.entryExists(clientSocket.getInetAddress().getHostAddress())) {
-				out = new OutputStreamWriter(clientSocket.getOutputStream());
-				Core.pdh.addPeer(clientSocket.getInetAddress().getHostAddress(), server, out, q, this, true);
-				Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" added to Peer DB",3);
+			if(! Core.pdh.entryExists(clientSocket.getRemoteAddress().toString().split(":")[0].substring(1))) {
+//				out = new OutputStreamWriter(clientSocket.getOutputStream());
+				Core.pdh.addPeer(clientSocket.getRemoteAddress().toString().split(":")[0].substring(1), server, clientSocket, q, this, true);
+				Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getRemoteAddress().toString().split(":")[0].substring(1)+" added to Peer DB",3);
 			}
 			else {
-				if(Core.pdh.getConnected(clientSocket.getInetAddress().getHostAddress())) {
-					Core.logManager.critical(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" already exists in Peer DB! and connected! (May be redundant connection)");
+				if(Core.pdh.getConnected(clientSocket.getRemoteAddress().toString().split(":")[0].substring(1))) {
+					Core.logManager.critical(this.getClass().getName(), "Address: "+clientSocket.getRemoteAddress().toString().split(":")[0].substring(1)+" already exists in Peer DB! and connected! (May be redundant connection)");
 					redudantConnection = true;
 				}
 				else {
-					Core.pdh.setConnected(clientSocket.getInetAddress().getHostAddress(), true);
+					Core.pdh.setConnected(clientSocket.getRemoteAddress().toString().split(":")[0].substring(1), true);
 				}
 			}
 		}
-	}
-	/**Read line takes 1 argument
-	 * InputStreamReader isr
-	 * InputStreamReader isr is an object from which data will be read from
-	 * @author abhiram
-	 * @throws IOException 
-	 * @throws InterruptedException 
-	 * */
-	public byte[] readLine(InputStreamReader isr) throws IOException, InterruptedException {
-		byte z = 0x10;
-		byte buffer[] = new byte[100];
-		int pos=0;
-		while(z!=0x0a) {
-			if(clientSocket.isClosed()) {
-				return null;
-			}
-			z=(byte) isr.read();
-			if(z==-1) {
-				if(pos==0) {
-					return null;
-				}
-				byte[] retbuff = new byte[pos-1];
-				for(int i=0;i<pos-1;i++) {
-					retbuff[i] = buffer[i];
-				}
-				return retbuff;
-			}
-			buffer[pos]=z;
-			pos++;
-		}
-		byte[] retbuff = new byte[pos-1];
-		for(int i=0;i<pos-1;i++) {
-			retbuff[i] = buffer[i];
-		}
-		return retbuff;
-	}
-	public byte[] readLine(InputStreamReader isr, long timeout) throws IOException, InterruptedException {
-		//TODO Implement timeout
-		byte z = 0x10;
-		byte buffer[] = new byte[100];
-		int pos=0;
-		while(z!=0x0a) {
-			if(clientSocket.isClosed()) {
-				return null;
-			}
-			z=(byte) isr.read();
-			if(z==-1) {
-				if(pos==0) {
-					return null;
-				}
-				byte[] retbuff = new byte[pos-1];
-				for(int i=0;i<pos-1;i++) {
-					retbuff[i] = buffer[i];
-				}
-				return retbuff;
-			}
-			buffer[pos]=z;
-			pos++;
-		}
-		byte[] retbuff = new byte[pos-1];
-		for(int i=0;i<pos-1;i++) {
-			retbuff[i] = buffer[i];
-		}
-		return retbuff;
 	}
 	public void run() {
 		if(redudantConnection) {
-			Core.logManager.critical(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" is flagged redudent, TCPHander Quitting");
+			try {
+				Core.logManager.critical(this.getClass().getName(), "Address: "+clientSocket.getRemoteAddress().toString().split(":")[0].substring(1)+" is flagged redudent, TCPHander Quitting");
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			try {
 				clientSocket.close();
 			} catch (IOException e) {
@@ -127,7 +71,6 @@ public class TCPHander extends Thread {
 		}
 		try { 
 			    //BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-			    in = new InputStreamReader(clientSocket.getInputStream());
 //			    if(server) {
 //				    out.write("AnonFS "+Configuration.version+"\n");
 //				    out.flush();
@@ -135,14 +78,14 @@ public class TCPHander extends Thread {
 			    while(true) {
 			    	
 			    	// Blocked read so no need for Thread.sleep
-			    	HashMap<String, Object> packet = p.readInputStreamPacket(in);
+			    	HashMap<String, Object> packet = p.readInputStreamPacket(clientSocket);
 			    	if(packet==null) {
 			    		synchronized(Core.pdh) {
 				    		//End of stream reached and socket is dead, so packup
-				    		Core.logManager.log(this.getClass().getName(), "IP: " + clientSocket.getInetAddress().getHostAddress()  + " Client "+id+" disconnected!",3);
+				    		Core.logManager.log(this.getClass().getName(), "IP: " + clientSocket.getRemoteAddress().toString().split(":")[0].substring(1)  + " Client "+id+" disconnected!",3);
 				    		//Core.pdh.removePeer(clientSocket.getInetAddress().getHostAddress());
-				    		Core.pdh.setConnected(clientSocket.getInetAddress().getHostAddress(),false);
-				    		Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" set connected to false",4);
+				    		Core.pdh.setConnected(clientSocket.getRemoteAddress().toString().split(":")[0].substring(1),false);
+				    		Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getRemoteAddress().toString().split(":")[0].substring(1)+" set connected to false",4);
 				    		clientSocket.close();
 				    		break;
 			    		}
@@ -169,9 +112,13 @@ public class TCPHander extends Thread {
 					    	if(message.compareTo("info")==0) {
 					    		Core.logManager.log(this.getClass().getName(), "ClientID:"+id+" asked info",4);
 					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("AnonFS "+Configuration.version+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
-					    		synchronized (out) {
-					    			out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
-						    		out.flush();
+					    		byte [] data = (byte[]) packetWrapper.get("packet");
+				    			ByteBuffer buffer = ByteBuffer.allocate(data.length);
+				    			buffer.put(data);
+					    		synchronized (clientSocket) {
+					    			while(buffer.hasRemaining()) {
+					    				clientSocket.write(buffer);
+					    			}
 								}
 					    	}
 					    	
@@ -186,9 +133,13 @@ public class TCPHander extends Thread {
 					    			}
 					    		}
 					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray(peerString), Packet.REPLY, 1, (byte) packet.get("id"));
-					    		synchronized (out) {
-					    			out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
-						    		out.flush();
+					    		byte [] data = (byte[]) packetWrapper.get("packet");
+				    			ByteBuffer buffer = ByteBuffer.allocate(data.length);
+				    			buffer.put(data);
+					    		synchronized (clientSocket) {
+					    			while(buffer.hasRemaining()) {
+					    				clientSocket.write(buffer);
+					    			}
 								}
 					    		//TODO Implement GetPeerList
 					    	}
@@ -196,9 +147,13 @@ public class TCPHander extends Thread {
 					    	// Command GetUID
 					    	else if(message.compareTo("GetUID")==0) {
 					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray(Core.UIDHander.getUIDString()), Packet.REPLY, 1, (byte) packet.get("id"));
-					    		synchronized (out) {
-					    			out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
-						    		out.flush();
+					    		byte [] data = (byte[]) packetWrapper.get("packet");
+				    			ByteBuffer buffer = ByteBuffer.allocate(data.length);
+				    			buffer.put(data);
+					    		synchronized (clientSocket) {
+					    			while(buffer.hasRemaining()) {
+					    				clientSocket.write(buffer);
+					    			}
 								}
 					    	}
 					    	
@@ -218,9 +173,13 @@ public class TCPHander extends Thread {
 						    			// Write Fail
 						    			packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("NACK"+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
 						    		}
-						    		synchronized (out) {
-						    			out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
-							    		out.flush();
+						    		byte [] data = (byte[]) packetWrapper.get("packet");
+					    			ByteBuffer buffer = ByteBuffer.allocate(data.length);
+					    			buffer.put(data);
+						    		synchronized (clientSocket) {
+						    			while(buffer.hasRemaining()) {
+						    				clientSocket.write(buffer);
+						    			}
 									}
 						    		// TODO Implement PushPiece
 					    		}
@@ -239,9 +198,13 @@ public class TCPHander extends Thread {
 					    		else {
 					    			packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray(piece.toString()+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
 					    		}
-					    		synchronized (out) {
-					    			out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
-						    		out.flush();
+					    		byte [] data = (byte[]) packetWrapper.get("packet");
+				    			ByteBuffer buffer = ByteBuffer.allocate(data.length);
+				    			buffer.put(data);
+					    		synchronized (clientSocket) {
+					    			while(buffer.hasRemaining()) {
+					    				clientSocket.write(buffer);
+					    			}
 								}
 					    		// TODO Implement GetPiece
 					    	}
@@ -249,28 +212,40 @@ public class TCPHander extends Thread {
 					    	// Command FindPiece
 					    	else if(message.startsWith("FindPiece")) {
 					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("Not Implemented!"+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
-					    		synchronized (out) {
-					    			out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
-						    		out.flush();
+					    		byte [] data = (byte[]) packetWrapper.get("packet");
+				    			ByteBuffer buffer = ByteBuffer.allocate(data.length);
+				    			buffer.put(data);
+					    		synchronized (clientSocket) {
+					    			while(buffer.hasRemaining()) {
+					    				clientSocket.write(buffer);
+					    			}
 								}
 					    		// TODO Implement FindPiece
 					    	}
 					    	
 					    	// Command MyIP
 					    	else if(message.startsWith("MyIP")) {
-					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray(clientSocket.getInetAddress().getHostAddress()+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
-					    		synchronized (out) {
-					    			out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
-						    		out.flush();
+					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray(clientSocket.getRemoteAddress().toString().split(":")[0].substring(1)+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
+					    		byte [] data = (byte[]) packetWrapper.get("packet");
+				    			ByteBuffer buffer = ByteBuffer.allocate(data.length);
+				    			buffer.put(data);
+					    		synchronized (clientSocket) {
+					    			while(buffer.hasRemaining()) {
+					    				clientSocket.write(buffer);
+					    			}
 								}
 					    	}
 					    	
 					    	// Command is not valid error condition
 					    	else {
 					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray("Invalid command!"+"\n"), Packet.REPLY, 1, (byte) packet.get("id"));
-					    		synchronized (out) {
-					    			out.write(ByteArrayTransforms.toCharArray((byte[]) packetWrapper.get("packet")));
-						    		out.flush();
+					    		byte [] data = (byte[]) packetWrapper.get("packet");
+				    			ByteBuffer buffer = ByteBuffer.allocate(data.length);
+				    			buffer.put(data);
+					    		synchronized (clientSocket) {
+					    			while(buffer.hasRemaining()) {
+					    				clientSocket.write(buffer);
+					    			}
 								}
 					    	}
 				    	}
@@ -282,8 +257,8 @@ public class TCPHander extends Thread {
 				    		Core.logManager.log(this.getClass().getName(),"reply mode",4);
 				    		synchronized (Core.pdh) {
 				    			Core.logManager.log(this.getClass().getName(),"got lock on pdh",4);
-				    			Core.logManager.log(this.getClass().getName(),""+clientSocket.getInetAddress().getHostAddress().toString(),4);
-				    			Queue<Object> queue = Core.pdh.getReplyQueue(clientSocket.getInetAddress().getHostAddress().toString());	
+				    			Core.logManager.log(this.getClass().getName(),""+clientSocket.getRemoteAddress().toString().split(":")[0].substring(1),4);
+				    			Queue<Object> queue = Core.pdh.getReplyQueue(clientSocket.getRemoteAddress().toString().split(":")[0].substring(1));	
 					    		if(queue.size()>0) {
 					    			int size = queue.size();
 					    			for(int i=0;i<size;i++) { // Parse like a deck of cards
@@ -308,9 +283,9 @@ public class TCPHander extends Thread {
 			    	}
 			    	catch(SocketException e) {
 			    		//End of stream reached and socket is dead, so packup
-			    		Core.logManager.log(this.getClass().getName(), "IP: " + clientSocket.getInetAddress().getHostAddress()  + " Client "+id+" disconnected!",4);
-			    		Core.pdh.setConnected(clientSocket.getInetAddress().getHostAddress(),false);
-			    		Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getInetAddress().getHostAddress()+" removed from Peer DB",4);
+			    		Core.logManager.log(this.getClass().getName(), "IP: " + clientSocket.getRemoteAddress().toString().split(":")[0].substring(1)  + " Client "+id+" disconnected!",4);
+			    		Core.pdh.setConnected(clientSocket.getRemoteAddress().toString().split(":")[0].substring(1),false);
+			    		Core.logManager.log(this.getClass().getName(), "Address: "+clientSocket.getRemoteAddress().toString().split(":")[0].substring(1)+" removed from Peer DB",4);
 			    		clientSocket.close();
 			    		break;
 			    	}
@@ -324,16 +299,19 @@ public class TCPHander extends Thread {
 	// TODO: Probably dead code.. if yes please remove
 	public static byte [] sendRequestGetData(String ip,String request) throws IOException, InterruptedException {
 		synchronized (Core.pdh) {
-			OutputStreamWriter osw = Core.pdh.getOutputStream(ip);
+			SocketChannel socketChannel = Core.pdh.getOutputStream(ip);
 			HashMap<String, Object> packetWrapper = Core.pdh.getTCPHander(ip).p.createPacket(ByteArrayTransforms.toByteArray(request), Packet.REPLY, 1, (byte)0);
 			byte [] packet = (byte[]) packetWrapper.get("packet");
 			byte id = (byte) packetWrapper.get("id");
 			CallBackPromise cbp = new CallBackPromise(id);
 			Core.pdh.getReplyQueue(ip).add(cbp);
+			ByteBuffer buffer = ByteBuffer.allocate(packet.length);
+			buffer.put(packet);
 			synchronized (cbp) {
-				synchronized (osw) {
-					osw.write(ByteArrayTransforms.toCharArray(packet));
-					osw.flush();
+				synchronized (socketChannel) {
+					while(buffer.hasRemaining()) {
+						socketChannel.write(buffer);
+					}
 				}
 				cbp.wait();
 			}

@@ -3,6 +3,8 @@ package core;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.SocketException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -69,12 +71,12 @@ public class TradeHandler {
 			
 			TCPHander handler;
 			Queue<Object> qcallback;
-			OutputStreamWriter osw;
+			SocketChannel socketChannel;
 			int selfHost;
 			synchronized (pdh) {
 				handler = pdh.getTCPHander(chosen_peer_list.get(0));
 				qcallback = pdh.getReplyQueue(chosen_peer_list.get(0));
-				osw = pdh.getOutputStream(chosen_peer_list.get(0));
+				socketChannel = pdh.getOutputStream(chosen_peer_list.get(0));
 				selfHost = pdh.getSelfHost(chosen_peer_list.get(0));
 			}
 //			System.out.println("SEND:"+piece.toString()+"Length:"+piece.toString().length());
@@ -91,10 +93,13 @@ public class TradeHandler {
 			CallBackPromise cbp = new CallBackPromise(packetid);
 			
 			synchronized (cbp) {
+				ByteBuffer buffer = ByteBuffer.allocate(packet.length);
+				buffer.put(packet);
 				try {
 					qcallback.add(cbp);
-					osw.write(ByteArrayTransforms.toCharArray(packet));
-					osw.flush();
+					while(buffer.hasRemaining()) {
+						socketChannel.write(buffer);
+					}
 					Core.logManager.log(this.getClass().getName(), "Going to wait on Call Back Promise ID:"+handler.p.getCreatedID(),4);
 					cbp.wait();
 					Core.logManager.log(this.getClass().getName(), "Wait finished on Call Back Promise",4);
@@ -160,13 +165,13 @@ public class TradeHandler {
 				
 				TCPHander handler;
 				Queue<Object> qcallback;
-				OutputStreamWriter osw;
+				SocketChannel socketChannel;
 				
 				int selfHost;
 				synchronized (pdh) {
 					handler = pdh.getTCPHander(chosen_peer_list.get(0));
 					qcallback = pdh.getReplyQueue(chosen_peer_list.get(0));
-					osw = pdh.getOutputStream(chosen_peer_list.get(0));
+					socketChannel = pdh.getOutputStream(chosen_peer_list.get(0));
 					selfHost = pdh.getSelfHost(chosen_peer_list.get(0));
 				}
 				System.out.println("Piece Request:"+ByteArrayTransforms.toHexString(piecechecksum));
@@ -187,9 +192,12 @@ public class TradeHandler {
 				synchronized (cbp) {
 					try {
 						qcallback.add(cbp);
-						synchronized (osw) {
-							osw.write(ByteArrayTransforms.toCharArray(packet));
-							osw.flush();
+						ByteBuffer buffer = ByteBuffer.allocate(packet.length);
+						buffer.put(packet);
+						synchronized (socketChannel) {
+							while(buffer.hasRemaining()) {
+								socketChannel.write(buffer);
+							}
 						}
 						Core.logManager.log(this.getClass().getName(), "Going to wait on Call Back Promise ID:"+handler.p.getCreatedID(),4);
 						cbp.wait();

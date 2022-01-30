@@ -3,6 +3,8 @@ package connectivity;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.SocketException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -27,13 +29,13 @@ public class PeerDiscovery extends Thread {
 				Core.logManager.log(this.getClass().getName(), "Inside i="+i+" value = "+peer,4);
 				TCPHander handler;
 				Queue<Object> qcallback;
-				OutputStreamWriter osw;
+				SocketChannel socketChannel;
 				int selfHost;
 				
 				synchronized (pdh) {
 					handler = pdh.getTCPHander(peer);
 					qcallback = pdh.getReplyQueue(peer);
-					osw = pdh.getOutputStream(peer);
+					socketChannel = pdh.getOutputStream(peer);
 					selfHost = pdh.getSelfHost(peer);
 				}
 				HashMap<String, Object> packetWrapper = handler.p.createPacket(ByteArrayTransforms.toByteArray("GetPeerList"),Packet.REQUEST,0,(byte)0);
@@ -50,14 +52,17 @@ public class PeerDiscovery extends Thread {
 						CallBackPromise cbp1 = new CallBackPromise(packetid1);
 						synchronized (cbp1) {
 							qcallback.add(cbp1);
-							if(handler.clientSocket.isClosed()) {
+							if(handler.clientSocket.isConnected()) {
 								Core.logManager.log(this.getClass().getName(), "Socket already closed for peer "+peer,4);
 							}
 							else {
 								Core.logManager.log(this.getClass().getName(), "Socket is open proceeding for peer "+peer,4);
-								synchronized (osw) {
-									osw.write(ByteArrayTransforms.toCharArray(packet1));
-									osw.flush();
+								ByteBuffer buffer = ByteBuffer.allocate(packet1.length);
+								buffer.put(packet1);
+								synchronized (socketChannel) {
+									while(buffer.hasRemaining()) {
+										socketChannel.write(buffer);
+									}
 								}
 								cbp1.wait();
 							}
@@ -69,7 +74,7 @@ public class PeerDiscovery extends Thread {
 							if(Core.UIDHander.getUIDString().equals(new String(recievedData1))) {
 								// Self loop
 								Core.logManager.log(this.getClass().getName(), "Loop detected "+peer,4);
-								osw.close();
+								socketChannel.close();
 								handler.clientSocket.close();
 								selfHost = 1;
 							}
@@ -105,9 +110,12 @@ public class PeerDiscovery extends Thread {
 				synchronized (cbp) {
 					try {
 						qcallback.add(cbp);
-						synchronized (osw) {
-							osw.write(ByteArrayTransforms.toCharArray(packet));
-							osw.flush();
+						ByteBuffer buffer = ByteBuffer.allocate(packet.length);
+						buffer.put(packet);
+						synchronized (socketChannel) {
+							while(buffer.hasRemaining()) {
+								socketChannel.write(buffer);
+							}
 						}
 						Core.logManager.log(this.getClass().getName(), "Going to wait on Call Back Promise ID:"+handler.p.getCreatedID(),4);
 						cbp.wait();

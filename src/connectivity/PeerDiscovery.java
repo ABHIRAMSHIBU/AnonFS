@@ -2,6 +2,7 @@ package connectivity;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.NoRouteToHostException;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -137,7 +138,12 @@ public class PeerDiscovery extends Thread {
 					LinkedList<String> peers =  Core.pdh.getPeers();
 					for(int k=0;k<ipList.length;k++) {
 						if(peers.indexOf(ipList[k])==-1) {
-							new TCPClient(ipList[k]);
+							try {
+								new TCPClient(ipList[k]);
+							} catch (NoRouteToHostException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 							Core.logManager.log(this.getClass().getName(), "Connecting "+ipList[k],4);
 						}
 						else {

@@ -6,6 +6,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Inet4Address;
 import java.net.InetSocketAddress;
+import java.net.NoRouteToHostException;
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
@@ -61,7 +62,7 @@ public class TCPClient{
 //		System.out.println("Got data "+new String(ByteArrayTransforms.toCharArray(p.getDecodedData())));
 //		// TODO: Remove reading request
 //	}
-	public TCPClient() {
+	public TCPClient() throws NoRouteToHostException{
 		this.ip=Configuration.DEFAULT_IP;
 		this.port=Configuration.DEFAULT_PORT;
 		try {
@@ -76,10 +77,10 @@ public class TCPClient{
 			e1.printStackTrace();
 		}
 	}
-	public TCPClient(String ip) {
+	public TCPClient(String ip) throws NoRouteToHostException{
 		this(ip,Configuration.DEFAULT_PORT);
 	}
-	public TCPClient(String ip, int port) {
+	public TCPClient(String ip, int port) throws NoRouteToHostException{
 		this.ip=ip;
 		this.port=port;
 		try {

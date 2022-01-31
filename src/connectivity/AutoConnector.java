@@ -1,5 +1,6 @@
 package connectivity;
 
+import java.net.NoRouteToHostException;
 import java.util.LinkedList;
 
 import javax.sound.midi.SysexMessage;
@@ -59,7 +60,13 @@ public class AutoConnector extends Thread{
 		// TODO Auto-generated method stub
 		super.run();
 		disconnectedPeers = new LinkedList<String>();
-		new TCPClient(Core.config.getBootStrapPeer());
+		try {
+			new TCPClient(Core.config.getBootStrapPeer());
+		}
+		catch (java.net.NoRouteToHostException e) {
+			Core.logManager.log(this.getClass().getName(),"Unable to connect to bootstrap peer "+Core.config.getBootStrapPeer());
+			e.printStackTrace();
+		}
 		while(true){
 			peerListRefresh();
 			String chosenPeer = peerFinder();
@@ -83,7 +90,13 @@ public class AutoConnector extends Thread{
 							Core.logManager.log(this.getClass().getName(),"Peer "+chosenPeer+" self loop",4); 
 					}
 					else {
-						new TCPClient(chosenPeer);
+						try {
+							new TCPClient(chosenPeer);
+						} catch (NoRouteToHostException e) {
+							// TODO Auto-generated catch block
+							Core.logManager.log(this.getClass().getName(),"Unable to connect to "+chosenPeer);
+							e.printStackTrace();
+						}
 						Core.logManager.log(this.getClass().getName(),"Peer "+chosenPeer+" TCPClient initiated",4);
 					}
 				}

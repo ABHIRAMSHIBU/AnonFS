@@ -19,9 +19,9 @@ public class TCPServer {
 			serverSocketChannel = ServerSocketChannel.open();
 			SocketChannel socketChannel = null;
 			serverSocketChannel.socket().bind(new InetSocketAddress(portNumber));
-			SocketChannel sc = serverSocketChannel.accept();
+			socketChannel = serverSocketChannel.accept();
 			long id = Core.cIDHandle.genID();
-	    	Core.logManager.log(this.getClass().getName(), "IP: " + sc.getRemoteAddress() + " Accepted Connection "+count,2);
+	    	Core.logManager.log(this.getClass().getName(), "IP: " + socketChannel.getRemoteAddress() + " Accepted Connection "+count,2);
 	    	(new TCPHander(socketChannel,count,true)).start();
 	    	count++;
 		} catch (IOException e1) {

@@ -53,7 +53,7 @@ public class PeerDiscovery extends Thread {
 						CallBackPromise cbp1 = new CallBackPromise(packetid1);
 						synchronized (cbp1) {
 							qcallback.add(cbp1);
-							if(handler.clientSocket.isConnected()) {
+							if(! handler.clientSocket.isConnected()) {
 								Core.logManager.log(this.getClass().getName(), "Socket already closed for peer "+peer,4);
 							}
 							else {

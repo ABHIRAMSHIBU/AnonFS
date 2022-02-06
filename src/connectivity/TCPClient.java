@@ -70,6 +70,7 @@ public class TCPClient{
 			InetSocketAddress ia = new InetSocketAddress(Configuration.DEFAULT_IP,Configuration.DEFAULT_PORT);
 			socketChannel.connect(ia);
 			TCPHander tcph = new TCPHander(socketChannel, Configuration.DEFAULT_PORT, false);
+			tcph.start();
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			Core.logManager.log(getClass().getName(), "TCPClient Error occured for "+Configuration.DEFAULT_IP,4);
@@ -88,6 +89,7 @@ public class TCPClient{
 			InetSocketAddress ia = new InetSocketAddress(ip,port);
 			socketChannel.connect(ia);
 			TCPHander tcph = new TCPHander(socketChannel, port, false);
+			tcph.start();
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			Core.logManager.log(getClass().getName(), "TCPClient Error occured for "+ip,4);

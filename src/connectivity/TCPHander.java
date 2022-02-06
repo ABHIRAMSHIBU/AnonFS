@@ -91,6 +91,7 @@ public class TCPHander extends Thread {
 			    		}
 			    	}
 			    	String message = new String((byte []) packet.get("body"));
+			    	Core.logManager.log(this.getClass().getName(), "Got message:"+message,4);
 //			    	byte line [] = readLine(in);
 //			    	if(line==null) {
 //			    		Core.logManager.log(this.getClass().getName(), "IP: " + clientSocket.getInetAddress().getHostAddress()  + " Client "+id+" disconnected!");
@@ -136,6 +137,7 @@ public class TCPHander extends Thread {
 					    		byte [] data = (byte[]) packetWrapper.get("packet");
 				    			ByteBuffer buffer = ByteBuffer.allocate(data.length);
 				    			buffer.put(data);
+				    			buffer.flip();
 					    		synchronized (clientSocket) {
 					    			while(buffer.hasRemaining()) {
 					    				clientSocket.write(buffer);
@@ -150,6 +152,7 @@ public class TCPHander extends Thread {
 					    		byte [] data = (byte[]) packetWrapper.get("packet");
 				    			ByteBuffer buffer = ByteBuffer.allocate(data.length);
 				    			buffer.put(data);
+				    			buffer.flip();
 					    		synchronized (clientSocket) {
 					    			while(buffer.hasRemaining()) {
 					    				clientSocket.write(buffer);

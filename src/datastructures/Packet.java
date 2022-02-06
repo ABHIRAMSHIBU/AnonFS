@@ -206,7 +206,9 @@ public class Packet {
 			// First 8 bytes are length so read it.
 			ByteBuffer buffer = ByteBuffer.allocate(8);
 			socketChannel.read(buffer);
+			buffer.flip();
 			byte sizearray[]=buffer.array();
+			Core.logManager.log(this.getClass().getName(), "Size Buffer is :"+buffer);
 			int size=0;
 			for(int i=0;i<8;i++) {
 				byte b = (byte)sizearray[i];
@@ -214,6 +216,9 @@ public class Packet {
 				//Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(b));
 			}
 			Core.logManager.log(this.getClass().getName(), "Streamreader got size: "+size);
+			if(size == 0) {
+				return null;
+			}
 			//Read Packet Size.
 			buffer = ByteBuffer.allocate(size);
 			buffer.put(sizearray);

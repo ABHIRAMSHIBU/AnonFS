@@ -58,14 +58,18 @@ public class PeerDiscovery extends Thread {
 							}
 							else {
 								Core.logManager.log(this.getClass().getName(), "Socket is open proceeding for peer "+peer,4);
-								ByteBuffer buffer = ByteBuffer.allocate(packet1.length);
+								ByteBuffer buffer = ByteBuffer.allocate(packet1.length+1);
 								buffer.put(packet1);
+								buffer.flip();
+								Core.logManager.log(this.getClass().getName(), "Byte buffer->"+buffer);
 								synchronized (socketChannel) {
 									while(buffer.hasRemaining()) {
 										socketChannel.write(buffer);
 									}
 								}
+								Core.logManager.log(this.getClass().getName(), "Going to wait for CBP");
 								cbp1.wait();
+								Core.logManager.log(this.getClass().getName(), "Waiting is over for CBP");
 							}
 							
 						}
@@ -113,6 +117,7 @@ public class PeerDiscovery extends Thread {
 						qcallback.add(cbp);
 						ByteBuffer buffer = ByteBuffer.allocate(packet.length);
 						buffer.put(packet);
+						buffer.flip();
 						synchronized (socketChannel) {
 							while(buffer.hasRemaining()) {
 								socketChannel.write(buffer);

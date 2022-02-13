@@ -59,6 +59,7 @@ public class AutoConnector extends Thread{
 	public void run() {
 		// TODO Auto-generated method stub
 		super.run();
+		this.setName("AutoConnector");
 		disconnectedPeers = new LinkedList<String>();
 		try {
 			new TCPClient(Core.config.getBootStrapPeer());

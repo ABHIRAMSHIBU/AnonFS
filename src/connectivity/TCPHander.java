@@ -54,9 +54,15 @@ public class TCPHander extends Thread {
 		}
 	}
 	public void run() {
+		try {
+			this.setName("TCPHandler for "+clientSocket.getRemoteAddress().toString().split(":")[0]);
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
 		if(redudantConnection) {
 			try {
-				Core.logManager.critical(this.getClass().getName(), "Address: "+clientSocket.getRemoteAddress().toString().split(":")[0].substring(1)+" is flagged redudent, TCPHander Quitting");
+				Core.logManager.critical(this.getClass().getName(), "Address: "+clientSocket.getRemoteAddress().toString().split(":")[0].substring(1)+" is flagged redundant, TCPHander Quitting");
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -128,9 +134,11 @@ public class TCPHander extends Thread {
 					    		String peerString="";
 					    		LinkedList<String> peerList = Core.pdh.getPeers();
 					    		for(int i=0;i<peerList.size();i++) {
-					    			peerString+=peerList.get(i);
-					    			if(i+1<peerList.size()) {
-					    				peerString+="\n";
+					    			if(! clientSocket.getRemoteAddress().toString().split(":")[0].substring(1).equals(peerList.get(i))) {
+						    			peerString+=peerList.get(i);
+						    			if(i+1<peerList.size()) {
+						    				peerString+="\n";
+						    			}
 					    			}
 					    		}
 					    		packetWrapper = p.createPacket(ByteArrayTransforms.toByteArray(peerString), Packet.REPLY, 1, (byte) packet.get("id"));
@@ -179,6 +187,7 @@ public class TCPHander extends Thread {
 						    		byte [] data = (byte[]) packetWrapper.get("packet");
 					    			ByteBuffer buffer = ByteBuffer.allocate(data.length);
 					    			buffer.put(data);
+					    			buffer.flip();
 						    		synchronized (clientSocket) {
 						    			while(buffer.hasRemaining()) {
 						    				clientSocket.write(buffer);
@@ -204,7 +213,9 @@ public class TCPHander extends Thread {
 					    		byte [] data = (byte[]) packetWrapper.get("packet");
 				    			ByteBuffer buffer = ByteBuffer.allocate(data.length);
 				    			buffer.put(data);
-					    		synchronized (clientSocket) {
+				    			buffer.flip(); // Flip is very important.
+					    		
+				    			synchronized (clientSocket) {
 					    			while(buffer.hasRemaining()) {
 					    				clientSocket.write(buffer);
 					    			}

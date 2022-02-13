@@ -72,12 +72,15 @@ public class Piece {
 //		System.out.println("MESSAGE:"+in);
 		byte [] message = ByteArrayTransforms.HexStringToBytes(in);
 		int signaturelength = 0;
-		
+		try {
 		for(int i=0;i<4;i++) {
 			signaturelength = signaturelength | (Byte.toUnsignedInt(message[i])<<(i*8));
 			//Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(message[i]));
 		}
-		
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 		// Allocating space
 		signature = new byte[signaturelength];
 		

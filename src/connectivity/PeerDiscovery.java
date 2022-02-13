@@ -19,6 +19,7 @@ import datastructures.PeerDataHandler;
 public class PeerDiscovery extends Thread {
 	PeerDataHandler pdh = Core.pdh;
 	public void run() {
+		this.setName("Peer Discovery");
 		while(true) {
 			LinkedList<String> peerList = null;
 			synchronized (pdh) {
@@ -138,8 +139,9 @@ public class PeerDiscovery extends Thread {
 					}
 				}
 				byte recievedData[] = cbp.data;
-				if(recievedData!=null) {
-					String ipList[] = (new String(recievedData)).split("\n");
+				if(recievedData!=null && (!(new String(recievedData)).strip().isEmpty())) {
+					String ipList[] = (new String(recievedData)).strip().split("\n");
+					Core.logManager.log(this.getClass().getName(), "Got Peer List from peer "+peer+" as "+new String(recievedData));
 					LinkedList<String> peers =  Core.pdh.getPeers();
 					for(int k=0;k<ipList.length;k++) {
 						if(peers.indexOf(ipList[k])==-1) {

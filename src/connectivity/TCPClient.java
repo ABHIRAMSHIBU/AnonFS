@@ -84,6 +84,9 @@ public class TCPClient{
 	public TCPClient(String ip, int port) throws NoRouteToHostException{
 		this.ip=ip;
 		this.port=port;
+		if(ip.strip().isEmpty()) {
+			Core.logManager.critical(this.getClass().getName(), "TCPClient Got String Empty!");
+		}
 		try {
 			SocketChannel socketChannel = SocketChannel.open();
 			InetSocketAddress ia = new InetSocketAddress(ip,port);

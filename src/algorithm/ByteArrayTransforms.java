@@ -70,6 +70,7 @@ public class ByteArrayTransforms {
 	 * @return
 	 */
 	public static byte [] HexStringToBytes(String in) {
+		in = in.strip();
 		int length = in.length();
 		if(length%2 == 0) {
 			// Even

@@ -95,6 +95,7 @@ public class TradeHandler {
 			synchronized (cbp) {
 				ByteBuffer buffer = ByteBuffer.allocate(packet.length);
 				buffer.put(packet);
+				buffer.flip();
 				try {
 					qcallback.add(cbp);
 					while(buffer.hasRemaining()) {
@@ -118,6 +119,9 @@ public class TradeHandler {
 			if(recievedData!=null) {
 				System.out.println(new String(recievedData));
 			}
+			else {
+				System.out.println("Didnt recieve any data!");
+			}
 			
 			try {
 				Thread.sleep(10);
@@ -128,7 +132,7 @@ public class TradeHandler {
 		}
 		System.out.println("File for "+filename+" is ID: "+ByteArrayTransforms.toHexString(mdh.getChecksum())); 
 	}
-	public void downlink(String metadataID) {
+	public void downlink(String metadataID, String filename) {
 		// TODO: Check if Metadata exists
 		System.out.println("MetadataID:"+metadataID);
 		// Download the file
@@ -194,6 +198,7 @@ public class TradeHandler {
 						qcallback.add(cbp);
 						ByteBuffer buffer = ByteBuffer.allocate(packet.length);
 						buffer.put(packet);
+						buffer.flip();
 						synchronized (socketChannel) {
 							while(buffer.hasRemaining()) {
 								socketChannel.write(buffer);
@@ -221,14 +226,19 @@ public class TradeHandler {
 						return;
 					}
 					Piece p = new Piece();
+					System.out.println("Works!-1... Remove this");
 					p.fromString(new String(recievedData));
+					System.out.println("Works!0... Remove this");
 					Core.pieceDiskStorage.pieceToDisk(p);
 				}
 
 			}
 			// From disk create the file.
+			System.out.println("Works!1... Remove this");
 			LinkedList<Piece> pieces = Core.pieceDiskStorage.getPiecesWithMetaData(mdh);
-			FileTransforms.PiecesToFile("file.out", pieces);
+			System.out.println("Works!2... Remove this");
+			FileTransforms.PiecesToFile(filename, pieces);
+			System.out.println("Works!3... Remove this");
 			
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block

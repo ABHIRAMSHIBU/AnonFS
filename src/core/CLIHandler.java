@@ -168,7 +168,16 @@ AnonFS-{UUID} # example command
 		}
 		else if(in.startsWith("download")) {
 			in = in.substring(8).strip();
-			Core.tradeHandler.downlink(in);
+			int space = in.indexOf(" ");
+			String filename;
+			if(space != -1) {
+				filename = in.substring(space+1);
+				in = in.substring(0,space);
+			}
+			else {
+				filename = "file.out"; // Legacy support
+			}
+			Core.tradeHandler.downlink(in,filename);
 		}
 		else if(in.startsWith("help")) {
 			output=help;

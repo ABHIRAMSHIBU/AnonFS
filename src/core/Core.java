@@ -153,6 +153,7 @@ public class Core {
     	CLIHandler cliHandler = new CLIHandler();
     	cliHandler.start();
     	TCPServer tcpServer = new TCPServer(Configuration.DEFAULT_PORT);
+    	System.out.println("MAIN Thread EXIT!");
     }
     /**
      * Test Order

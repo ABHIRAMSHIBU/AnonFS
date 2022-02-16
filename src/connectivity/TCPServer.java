@@ -19,11 +19,13 @@ public class TCPServer {
 			serverSocketChannel = ServerSocketChannel.open();
 			SocketChannel socketChannel = null;
 			serverSocketChannel.socket().bind(new InetSocketAddress(portNumber));
-			socketChannel = serverSocketChannel.accept();
-			long id = Core.cIDHandle.genID();
-	    	Core.logManager.log(this.getClass().getName(), "IP: " + socketChannel.getRemoteAddress() + " Accepted Connection "+count,2);
-	    	(new TCPHander(socketChannel,count,true)).start();
-	    	count++;
+			while(true) {
+				socketChannel = serverSocketChannel.accept();
+				long id = Core.cIDHandle.genID();
+		    	Core.logManager.log(this.getClass().getName(), "IP: " + socketChannel.getRemoteAddress() + " Accepted Connection "+count,2);
+		    	(new TCPHander(socketChannel,count,true)).start();
+		    	count++;
+			}
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			Core.logManager.critical(this.getClass().getName(), "Unable to start server port:"+portNumber+" might be in use!");

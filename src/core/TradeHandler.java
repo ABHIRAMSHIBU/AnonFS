@@ -35,7 +35,7 @@ public class TradeHandler {
 		
 		// Get the metadata and create pieces
 		MetaDataHandler mdh = new MetaDataHandler();
-		LinkedList<Piece> pieces = FileTransforms.FileToPices(filename, 100 , mdh);
+		LinkedList<Piece> pieces = FileTransforms.FileToPices(filename, Core.config.getMaxPieceSize()*1024 , mdh);
 		
 		try {
 			Core.metadataDiskStorage.metadataToDisk(mdh);
@@ -121,13 +121,6 @@ public class TradeHandler {
 			}
 			else {
 				System.out.println("Didnt recieve any data!");
-			}
-			
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 		System.out.println("File for "+filename+" is ID: "+ByteArrayTransforms.toHexString(mdh.getChecksum())); 
@@ -226,19 +219,14 @@ public class TradeHandler {
 						return;
 					}
 					Piece p = new Piece();
-					System.out.println("Works!-1... Remove this");
 					p.fromString(new String(recievedData));
-					System.out.println("Works!0... Remove this");
 					Core.pieceDiskStorage.pieceToDisk(p);
 				}
 
 			}
 			// From disk create the file.
-			System.out.println("Works!1... Remove this");
 			LinkedList<Piece> pieces = Core.pieceDiskStorage.getPiecesWithMetaData(mdh);
-			System.out.println("Works!2... Remove this");
 			FileTransforms.PiecesToFile(filename, pieces);
-			System.out.println("Works!3... Remove this");
 			
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block

@@ -96,7 +96,7 @@ public class ConfigInit {
 					+ "# low, it might take longer time to find and assemble file because it may be scattered. \n"
 					+ "# To set piece size uncomment below line, by default its 4MiB \n"
 					+ "\n"
-					+ "# MAX_PIECE_SIZE=8M \n"
+					+ "# MAX_PIECE_SIZE=512 \n"
 					+ "\n"
 					+ "# BOOTSTRAP_PEER is the peer with which AnonFS bootstraps. This peer will be used to\n"
 					+ "# know other peers. You can set it to a custom peer of your choice.\n"
@@ -138,6 +138,9 @@ public class ConfigInit {
 	}
 	public String getBootStrapPeer() {
 		return ini.fetch("network", "BOOTSTRAP_PEER");
+	}
+	public int getMaxPieceSize() {
+		return Integer.parseInt(ini.fetch("network", "MAX_PIECE_SIZE"));
 	}
 	public String getPeerRoot() {
 		String root = ini.fetch("disk", "PEER_ROOT");

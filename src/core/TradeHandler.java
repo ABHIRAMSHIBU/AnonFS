@@ -35,7 +35,7 @@ public class TradeHandler {
 		
 		// Get the metadata and create pieces
 		MetaDataHandler mdh = new MetaDataHandler();
-		LinkedList<Piece> pieces = FileTransforms.FileToPices(filename, Core.config.getMaxPieceSize()*1024 , mdh);
+		LinkedList<Piece> pieces = FileTransforms.FileToPices(filename, Core.config.getMaxPieceSize() , mdh);
 		
 		try {
 			Core.metadataDiskStorage.metadataToDisk(mdh);

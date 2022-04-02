@@ -7,6 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 
+import algorithm.ByteArrayTransforms;
 import core.Core;
 
 public class Packet {
@@ -39,24 +40,31 @@ public class Packet {
 		byte base64Payload = 0;
 		byte breakConnection = 0;
 		byte flags = (byte) (request<<0 | base64Payload<<1 | breakConnection<<2);
-		byte[] message = new byte[21+data.length];
+		byte[] message = new byte[29+data.length];
+		int index=0;
 		//Core.logManager.log(this.getClass().getName(), "The original length is : "+(20+data.length) );
 		// Set size
+		byte sizeArray[] = new byte[8];
 		for(int i=0;i<8;i++) {
-			message[i]=(byte) ((0xFF<<(i*8) & ((long)data.length+21))>>(i*8));
+			sizeArray[i]=(byte) ((0xFF<<(i*8) & ((long)data.length+29))>>(i*8));
 			//Core.logManager.log(this.getClass().getName(), "Byte at "+i+" is "+Byte.toUnsignedInt(message[i]) );
 		}
 		long size=0;
 		for(int i=0;i<8;i++) {
-			size = size | (Byte.toUnsignedInt(message[i])<<(i*8));
+			size = size | (Byte.toUnsignedInt(sizeArray[i])<<(i*8));
 			//Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(message[i]));
 		}
 		Core.logManager.log(this.getClass().getName(), "Create Packet Decoded size: "+size);
+		char  sizeHexArray[] = ByteArrayTransforms.toHexString(sizeArray).toCharArray();
+		for(int i=0;i<16;i++) {
+			message[i] = (byte)sizeHexArray[i];
+		}
+		index=16;
 		// Set flags
-		message[8]=flags;
+		message[index++]=flags;
 		// Set id
-		message[9]=id;
-		message[10]=refid;
+		message[index++]=id;
+		message[index++]=refid;
 		// Bug fix set ID before being altered
 		packetWrapper.put("id", id);
 		if(id==120) { //Increment ID rollover
@@ -67,16 +75,16 @@ public class Packet {
 		}
 		// Set padding to 0, currently unused
 		for(int i=0;i<8;i++) {
-			message[i+11]=0;
+			message[index++]=0;
 		}
 		// Set TTL
 		for(int i=0;i<2;i++) {
-			message[i+19]=(byte) ((0xFF<<(i*8) & (TTL))>>(i*8));
+			message[index++]=(byte) ((0xFF<<(i*8) & (TTL))>>(i*8));
 			//Core.logManager.log(this.getClass().getName(), "Byte at "+i+" is "+Byte.toUnsignedInt(message[i+18]));
 		}
 		// Set data
 		for(int i=0;i<data.length;i++) {
-			message[i+21]=data[i];
+			message[index++]=data[i];
 		}
 		packetWrapper.put("refid", refid);
 		packetWrapper.put("ttl", TTL);
@@ -95,42 +103,49 @@ public class Packet {
 		int size=0;
 		int ttl=0;
 		int padding = 0;
+		int index=0;
 		//Core.logManager.log(this.getClass().getName(), "The original length is : "+(20+data.length) );
 		// Get size
+		char sizeHexChar[] = new char[16];
+		for(int i=0;i<index+16;i++) {
+			sizeHexChar[i] = (char)message[i];
+		}
+		index+=16;
+		byte sizearr[] = ByteArrayTransforms.HexStringToBytes(new String(sizeHexChar));
 		for(int i=0;i<8;i++) {
-			size = size | (Byte.toUnsignedInt(message[i])<<(i*8));
+			size = size | (Byte.toUnsignedInt(sizearr[i])<<(i*8));
 			//Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(message[i]));
 		}
 		this._size=size;
 		Core.logManager.log(this.getClass().getName(), "DecodePacket Size is "+size);
-		byte[] data = new byte[size-21];
+		byte[] data = new byte[size-29];
 		this._data=data;
 		// Get flags
-		flags=message[8];
+		flags=message[index++];
 		this._flags=flags;
 		// Get id
-		byte id=message[9];
-		byte refid=message[10];
-		//Core.logManager.log(this.getClass().getName(), "ID is "+id);
+		byte id=message[index++];
+		byte refid=message[index++];
+		Core.logManager.log(this.getClass().getName(), "ID is "+id);
 		this._id=id;
 		this._refid=refid;
 		// Get padding 
 		for(int i=0;i<8;i++) {
-			padding = padding | (Byte.toUnsignedInt(message[i+11])<<(i*8));
+			padding = padding | (Byte.toUnsignedInt(message[index++])<<(i*8));
 			//Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(message[i+10]));
 		}
 		//Core.logManager.log(this.getClass().getName(), "Padding is "+padding);
 		this._padding=padding;
 		// Get TTL
 		for(int i=0;i<2;i++) {
-			ttl = ttl | (Byte.toUnsignedInt(message[i+19])<<(i*8));
+			ttl = ttl | (Byte.toUnsignedInt(message[index++])<<(i*8));
 			//Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(message[i+18]));
 		}
 		//Core.logManager.log(this.getClass().getName(), "ttl is "+ttl);
 		this._ttl=ttl;
 		// Get data
 		for(int i=0;i<data.length;i++) {
-			data[i]=message[i+21];
+			data[i]=message[index++];
 		}
 		this._data=data;
 		packetWrapper.put("id", id);
@@ -204,14 +219,15 @@ public class Packet {
 	public HashMap<String, Object> readInputStreamPacket(SocketChannel socketChannel) throws IOException {
 		try {
 			// First 8 bytes are length so read it.
-			ByteBuffer buffer = ByteBuffer.allocate(8);
+			ByteBuffer buffer = ByteBuffer.allocate(16);
 			socketChannel.read(buffer);
 			buffer.flip();
 			byte sizearray[]=buffer.array();
 			Core.logManager.log(this.getClass().getName(), "Size Buffer is :"+buffer);
 			int size=0;
+			byte sizeActual[] = ByteArrayTransforms.HexStringToBytes(new String(ByteArrayTransforms.toCharArray(sizearray)));
 			for(int i=0;i<8;i++) {
-				byte b = (byte)sizearray[i];
+				byte b = (byte)sizeActual[i];
 				size = size | (Byte.toUnsignedInt(b)<<(i*8));
 				//Core.logManager.log(this.getClass().getName(), "Message["+i+"] is "+Byte.toUnsignedInt(b));
 			}

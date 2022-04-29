@@ -73,4 +73,18 @@
             <classpath refid="run.Core (1).classpath"/>
         </java>
     </target>
+
+    <property name="dir.buildfile" value="."/>
+    <property name="dir.workspace" value="${dir.buildfile}"/>
+    <property name="dir.jarfile" value="${dir.workspace}"/>
+    <target name="jar" depends="build">
+        <jar destfile="${dir.workspace}/AnonFS.jar" filesetmanifest="mergewithoutmain">
+            <manifest>
+                <attribute name="Main-Class" value="core.Core"/>
+                <attribute name="Class-Path" value="."/>
+            </manifest>
+            <fileset dir="${dir.buildfile}/bin"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.buildfile}/libs/ini4j-0.5.4.jar"/>
+        </jar>
+    </target>
 </project>

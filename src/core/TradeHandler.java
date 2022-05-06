@@ -19,7 +19,7 @@ import datastructures.PeerDataHandler;
 import datastructures.Piece;
 
 public class TradeHandler {
-	public void uplink(String filename) {
+	public String uplink(String filename) {
 		// TODO: Check if file exists
 		// Send the file
 		LinkedList<String> peers ;
@@ -30,7 +30,7 @@ public class TradeHandler {
 		if(peers.size()==0) {
 			Core.logManager.log(this.getClass().getName(), "Not sufficient amount of peers! BAIL OUT");
 			System.out.println("Not enough peers to upload");
-			return;
+			return null;
 		}
 		
 		// Get the metadata and create pieces
@@ -123,7 +123,9 @@ public class TradeHandler {
 				System.out.println("Didnt recieve any data!");
 			}
 		}
-		System.out.println("File for "+filename+" is ID: "+ByteArrayTransforms.toHexString(mdh.getChecksum())); 
+		String md5sum_mdh = ByteArrayTransforms.toHexString(mdh.getChecksum());
+		System.out.println("File for "+filename+" is ID: "+md5sum_mdh);
+		return md5sum_mdh;
 	}
 	public void downlink(String metadataID, String filename) {
 		// TODO: Check if Metadata exists

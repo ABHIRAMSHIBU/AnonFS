@@ -20,6 +20,7 @@ import datastructures.Piece;
 
 public class TradeHandler {
 	public String uplink(String filename) {
+		Core.logManager.log(TradeHandler.class.getName(), "uplink: "+filename);
 		// TODO: Check if file exists
 		// Send the file
 		LinkedList<String> peers ;
@@ -38,6 +39,7 @@ public class TradeHandler {
 		LinkedList<Piece> pieces = FileTransforms.FileToPices(filename, Core.config.getMaxPieceSize() , mdh);
 		
 		try {
+			Core.logManager.log(this.getClass().getName(), "Saving metadata to Disk");
 			Core.metadataDiskStorage.metadataToDisk(mdh);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
@@ -46,6 +48,7 @@ public class TradeHandler {
 		
 		// Write the pieces to disk
 		try {
+			Core.logManager.log(this.getClass().getName(), "Saving pieces to Disk");
 			Core.pieceDiskStorage.piecesToDisk(pieces);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -63,6 +66,7 @@ public class TradeHandler {
 				}
 			}
 		}
+		Core.logManager.log(this.getClass().getName(), "Peer Chosen: "+chosen_peer_list.get(0));
 		
 		for(int i=0;i<pieces.size();i++) {
 			// At this point we have piece in our hand, we have to just send it..

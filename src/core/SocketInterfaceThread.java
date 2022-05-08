@@ -61,8 +61,15 @@ class SocketInterface extends Thread {
 					// get the filename after split
 					String filename = data.split(" ")[1];
 					Core.logManager.log(SocketInterface.class.getName(),"filename: "+filename+"Uploading...");
-					String md5sum_mdh = Core.tradeHandler.uplink(filename);
-					Core.logManager.log(SocketInterface.class.getName(),"md5sum_mdh: "+md5sum_mdh);
+					String checksum = Core.tradeHandler.uplink(filename);
+					Core.logManager.log(SocketInterface.class.getName(),"checksum: "+checksum);
+					// send the md5sum_mdh to the client
+					try {
+						socket.getOutputStream().write(checksum.getBytes());
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 				// if data is not null and download
 				else if(data!=null && data.startsWith("download")) {
@@ -71,6 +78,16 @@ class SocketInterface extends Thread {
 					String metadataId = data.split(" ")[2];
 					Core.logManager.log(SocketInterface.class.getName(),"filename: "+filename+"Downloading...");
 					Core.tradeHandler.downlink(metadataId, filename);
+					
+					try {
+						socket.getOutputStream().write("DONE".getBytes());	
+					}
+					catch (IOException e) {
+						e.printStackTrace();
+					}
+					catch(Exception e) {
+						e.printStackTrace();
+					}
 				}
 				// if null then terminate
 				else if(data==null) {

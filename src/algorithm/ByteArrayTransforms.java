@@ -1,5 +1,9 @@
 package algorithm;
 
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.util.HexFormat;
+
 public class ByteArrayTransforms {
 	/**
 	 * Converts a byte array to char array
@@ -44,24 +48,33 @@ public class ByteArrayTransforms {
 	 * @param in - Byte array to be transformed
 	 * @return
 	 */
+//	 public static String toHexString(byte [] in) {
+//	 	String hexout = "";
+//	 	for(int i=0;i<in.length;i++) {
+//	 		try {
+//	 			String hex = Integer.toHexString(in[i]);
+//	 			if(hex.length()==1) {
+//	 				hex = "0"+hex;
+//	 			}
+//	 			else {
+//	 				hex = hex.substring(hex.length()-2,hex.length());
+//	 			}
+//	 			hexout+=hex;
+//	 		}
+//	 		catch (StringIndexOutOfBoundsException e) {
+//	 			throw e;
+//	 		}
+//	 	}
+//	 	return hexout;
+//	 }
+
+	/**
+	 * Encodes a byte array into string of hexadecimal chars
+	 * @param in - Byte array to be transformed
+	 * @return
+	 */
 	public static String toHexString(byte [] in) {
-		String hexout = "";
-		for(int i=0;i<in.length;i++) {
-			try {
-				String hex = Integer.toHexString(in[i]);
-				if(hex.length()==1) {
-					hex = "0"+hex;
-				}
-				else {
-					hex = hex.substring(hex.length()-2,hex.length());
-				}
-				hexout+=hex;
-			}
-			catch (StringIndexOutOfBoundsException e) {
-				throw e;
-			}
-		}
-		return hexout;
+		return HexFormat.of().formatHex(in);
 	}
 	
 	/**

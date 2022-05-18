@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 import algorithm.ByteArrayTransforms;
@@ -109,12 +110,14 @@ public class PieceDiskStorage {
 	}
 	// TODO: Need to add timetolive
 	
-	public boolean piecesToDisk(LinkedList<Piece> pieces) throws IOException {
-		boolean ret = true;
+	public HashMap<String,Boolean> piecesToDisk(LinkedList<Piece> pieces) throws IOException {
+		HashMap<String,Boolean> result = new HashMap<String,Boolean>();
 		for(int i=0; i<pieces.size(); i++) {
-			ret = ret && pieceToDisk(pieces.get(i));
+			Piece p = pieces.get(i);
+			Boolean b = pieceToDisk(p);
+			result.put(ByteArrayTransforms.toHexString(p.checksum), b);
 		}
-		return ret;
+		return result;
 	}
 	
 	public LinkedList<Piece> getPiecesWithMetaData(MetaDataHandler mdh) throws ClassNotFoundException, IOException {

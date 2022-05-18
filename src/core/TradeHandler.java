@@ -47,9 +47,10 @@ public class TradeHandler {
 		}
 		
 		// Write the pieces to disk
+		HashMap<String,Boolean> pieceMap = null;
 		try {
 			Core.logManager.log(this.getClass().getName(), "Saving pieces to Disk");
-			Core.pieceDiskStorage.piecesToDisk(pieces);
+			 pieceMap = Core.pieceDiskStorage.piecesToDisk(pieces);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -71,6 +72,19 @@ public class TradeHandler {
 		for(int i=0;i<pieces.size();i++) {
 			// At this point we have piece in our hand, we have to just send it..
 			Piece piece = pieces.get(i);
+			try {
+				String checksum = ByteArrayTransforms.toHexString(piece.getChecksum());
+				if(pieceMap.containsKey(checksum)) {
+					Core.logManager.log(this.getClass().getName(),"BLUE BLUE BLUE");
+					// Assuming others have the piece, because it is in the disk
+//					continue;
+				}
+			}
+			catch(Exception e) {
+				Core.logManager.log(this.getClass().getName(), e.toString());
+				e.printStackTrace();
+			}
+			Core.logManager.log(this.getClass().getName(),"BLAH BLAH BLAH");
 			PeerDataHandler pdh = Core.pdh;
 			
 			TCPHander handler;

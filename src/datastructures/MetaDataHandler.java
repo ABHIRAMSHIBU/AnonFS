@@ -1,6 +1,7 @@
 package datastructures;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import algorithm.ByteArrayTransforms;
@@ -44,6 +45,26 @@ public class MetaDataHandler {
 		}
 		return metadataString;
 	}
+
+	public byte[] toChecksumBytes() {
+		byte[] linearbyetes = new byte[table.size()*65];
+		// loop through table using foreach
+		table.entrySet().parallelStream().forEach(arg0 -> {
+			byte[] checksum = arg0.getValue();
+			System.arraycopy(checksum, 0, linearbyetes, arg0.getKey().intValue()*65, 64);
+			linearbyetes[arg0.getKey().intValue()*65+64] = (byte) 0x0D;
+		});
+		return linearbyetes;
+	}
+
+	public void fromCheckSumBytes(byte[] checksumBytes) {
+		for(int i=0;i<checksumBytes.length/65;i+=1) {
+			byte[] checksum = new byte[64];
+			System.arraycopy(checksumBytes, i*65, checksum, 0, 64);
+			table.put((long) i, checksum);
+		}
+
+	};
 	
 	public void fromString(String input) throws Exception {
 		if(table.size()!=0) {
@@ -65,7 +86,7 @@ public class MetaDataHandler {
 	
 	public void calculateChecksum() {
 		try {
-			checksum = SHA512.digest(ByteArrayTransforms.toByteArray(toString()));
+			checksum = SHA512.digest(toChecksumBytes());
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

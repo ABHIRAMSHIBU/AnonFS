@@ -3,6 +3,8 @@ package filesystem;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -70,14 +72,18 @@ public class MetadataDiskStorage {
 		}
 		else {
 			Core.logManager.log(this.getClass().getName(), "File does not  exist, writing",4);
-			BufferedWriter fileOut = new BufferedWriter(new FileWriter(outputFile));
-			fileOut.write(mdh.toString()+"\n");
+			// BufferedWriter fileOut = new BufferedWriter(new FileWriter(outputFile));
+			// fileOut.write(mdh.toString()+"\n");
+
+			FileOutputStream fos = new FileOutputStream(outputFile);
+			fos.write(mdh.toChecksumBytes());
 			
 //			FileOutputStream fileOut = new FileOutputStream(outputFile);
 //			ObjectOutputStream objectToFile = new ObjectOutputStream(fileOut);
 //			objectToFile.writeObject(p);
 //			objectToFile.close();
-			fileOut.close();
+			// fileOut.close();
+			fos.close();
 			return true;
 		}
 	}
@@ -95,21 +101,13 @@ public class MetadataDiskStorage {
 			return null;
 		}
 		else {
-			BufferedReader fileIn = new BufferedReader(new FileReader(inputFile));
+			// read using InputStream
+			FileInputStream fileIn = new FileInputStream(inputFile);
+			byte[] fileBytes = new byte[(int) inputFile.length()];
+			fileIn.read(fileBytes);
 			MetaDataHandler mdh = new MetaDataHandler();
-			String data = "";
-			while(true) {
-				String line = fileIn.readLine();
-				if(line.equals("")) {
-					break;
-				}
-				data+=line+"\n";
-			}
 			try {
-				mdh.fromString(data);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				mdh.fromCheckSumBytes(fileBytes);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

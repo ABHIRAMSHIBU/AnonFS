@@ -17,7 +17,7 @@ public class ConfigInit {
 		 * */
 		if(!configFile.exists()) {
 			pw = new PrintWriter(new FileWriter(configFile));
-			Core.logManager.log(this.getClass().getName(), "Configuration file does not exist, creating.");
+//			Core.logManager.log(this.getClass().getName(), "Configuration file does not exist, creating.");
 			pw.print("# AnonFS v0.1 Configuration \n"
 					+ "\n"
 					+ "[network]\n"
@@ -127,10 +127,10 @@ public class ConfigInit {
 		}
 		// Please don't use loglevel here as loglevel is not yet avaiable as of now.
 		else {
-			Core.logManager.log(this.getClass().getName(), "Configuration file exists, reading.");
+//			Core.logManager.log(this.getClass().getName(), "Configuration file exists, reading.");
 		}
 		ini = new Ini(configFile);
-		Core.logManager.log(this.getClass().getName(),"Configuration Parsed-> "+ini.toString());
+//		Core.logManager.log(this.getClass().getName(),"Configuration Parsed-> "+ini.toString());
 		failure = false;
 	}
 	public Ini getIni() {

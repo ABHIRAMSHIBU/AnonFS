@@ -74,10 +74,10 @@ public class TradeHandler {
 			Piece piece = pieces.get(i);
 			try {
 				String checksum = ByteArrayTransforms.toHexString(piece.getChecksum());
-				if(pieceMap.containsKey(checksum)) {
+				if(!(pieceMap.containsKey(checksum) && pieceMap.get(checksum))) {
 					Core.logManager.log(this.getClass().getName(),"BLUE BLUE BLUE");
 					// Assuming others have the piece, because it is in the disk
-//					continue;
+					continue;
 				}
 			}
 			catch(Exception e) {

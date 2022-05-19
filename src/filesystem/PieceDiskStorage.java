@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -112,11 +113,14 @@ public class PieceDiskStorage {
 	
 	public HashMap<String,Boolean> piecesToDisk(LinkedList<Piece> pieces) throws IOException {
 		HashMap<String,Boolean> result = new HashMap<String,Boolean>();
-		for(int i=0; i<pieces.size(); i++) {
-			Piece p = pieces.get(i);
-			Boolean b = pieceToDisk(p);
-			result.put(ByteArrayTransforms.toHexString(p.checksum), b);
-		}
+		pieces.parallelStream().forEach(p -> {
+			try {
+				result.put(ByteArrayTransforms.toHexString(p.checksum), pieceToDisk(p));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
 		return result;
 	}
 	

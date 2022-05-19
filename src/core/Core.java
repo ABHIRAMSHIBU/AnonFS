@@ -33,8 +33,14 @@ public class Core {
 	public static MetadataDiskStorage metadataDiskStorage;
 	public static TradeHandler tradeHandler;
     public static void runmain(String[] args) {
-    	UIDHander = new PeerUIDHander();
+    	try {
+			config = new ConfigInit();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     	logManager = new LogManager();
+    	UIDHander = new PeerUIDHander();
     	MetaDataHandler mdh = new MetaDataHandler();
     	pieceDiskStorage = new PieceDiskStorage();
     	metadataDiskStorage = new MetadataDiskStorage();
@@ -43,12 +49,7 @@ public class Core {
     	logManager.log(Core.class.getName(), "Welcome to AnonFS version: "+Configuration.version+" core now alive!");
     	logManager.log(Core.class.getName(), "UID:"+UIDHander.getUIDString());
     	cIDHandle = new ConnectionIDHander();
-    	try {
-			config = new ConfigInit();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+    	
     	
     	pieceDiskStorage.diskinit();
     	metadataDiskStorage.diskinit();
@@ -149,7 +150,7 @@ public class Core {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-    	
+    	Core.logManager.log(Core.class.getName(), null);
     	CLIHandler cliHandler = new CLIHandler();
     	cliHandler.start();
 		SocketInterfaceThread sit = new SocketInterfaceThread();
@@ -157,6 +158,7 @@ public class Core {
     	TCPServer tcpServer = new TCPServer(Configuration.DEFAULT_PORT);
     	System.out.println("MAIN Thread EXIT!");
     }
+
     /**
      * Test Order
      * 

@@ -65,8 +65,10 @@ public class LogManager {
 		}
 	}
 	public void log(String class_name,String message) {
-		log.log(Level.INFO,"ID:"+count+" Class:"+class_name+" "+message);
-		count+=1;
+		if(Core.config.getLogLevel()>0) {
+			log.log(Level.INFO,"ID:"+count+" Class:"+class_name+" "+message);
+			count+=1;
+		}
 	}
 	public void critical(String class_name,String message) {
 		log.log(Level.SEVERE,"ID:"+count+" Class:"+class_name+" "+message);
